@@ -334,3 +334,128 @@ right = mid;
 
 
 
+### 1.1.4 最大子序和
+
+题目描述：
+
+```c++
+给定一个整数数组 nums ，找到一个具有最大和的连续子数组（子数组最少包含一个元素），返回其最大和。
+
+ 
+
+示例 1：
+
+输入：nums = [-2,1,-3,4,-1,2,1,-5,4]
+输出：6
+解释：连续子数组 [4,-1,2,1] 的和最大，为 6 。
+示例 2：
+
+输入：nums = [1]
+输出：1
+示例 3：
+
+输入：nums = [0]
+输出：0
+示例 4：
+
+输入：nums = [-1]
+输出：-1
+示例 5：
+
+输入：nums = [-100000]
+输出：-100000
+
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/maximum-subarray
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+```
+
+思路：
+
+对于我这个菜鸡来说，能想到的唯一思路就是双指针暴力算法。
+
+暴力算法的代码如下(我自己没写，因为我虽然不会，但我确定肯定不是这种解法）：
+
+```c++
+class Solution
+{
+public:
+    int maxSubArray(vector<int> &nums)
+    {
+        //类似寻找最大最小值的题目，初始值一定要定义成理论上的最小最大值
+        int max = INT_MIN;
+        int numsSize = int(nums.size());
+        for (int i = 0; i < numsSize; i++)
+        {
+            int sum = 0;
+            for (int j = i; j < numsSize; j++)
+            {
+                sum += nums[j];
+                if (sum > max)
+                {
+                    max = sum;
+                }
+            }
+        }
+
+        return max;
+    }
+};
+
+作者：pinku-2
+链接：https://leetcode-cn.com/problems/maximum-subarray/solution/zui-da-zi-xu-he-cshi-xian-si-chong-jie-fa-bao-li-f/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+```
+
+
+
+看解析，这道题应该用动态规划相关知识。嗯，我的第一道动态规划题（笑）。
+
+动态规划思路解析如下：
+
+![截屏2021-08-12 下午6.02.53](/Users/geyishan/Library/Mobile Documents/com~apple~CloudDocs/截屏2021-08-12 下午6.02.53.png)
+
+那么，对于我来说，最关键的思路就是第二段，求出第i个数结尾的连续子数组的最大和。后面的思路就水到渠成了。为什么不求第i个数开始的连续子数组的最大和，因为这样前面元素求出来的和后面元素无法直接利用，比较麻烦。
+
+动态规划代码如下：
+
+```c++
+class Solution
+{
+public:
+    int maxSubArray(vector<int> &nums)
+    {
+        //类似寻找最大最小值的题目，初始值一定要定义成理论上的最小最大值
+        int result = INT_MIN;
+        int numsSize = int(nums.size());
+        //dp[i]表示nums中以nums[i]结尾的最大子序和
+        vector<int> dp(numsSize);
+        dp[0] = nums[0];
+        result = dp[0];
+        for (int i = 1; i < numsSize; i++)
+        {
+            dp[i] = max(dp[i - 1] + nums[i], nums[i]);
+            result = max(result, dp[i]);
+        }
+
+        return result;
+    }
+};
+
+作者：pinku-2
+链接：https://leetcode-cn.com/problems/maximum-subarray/solution/zui-da-zi-xu-he-cshi-xian-si-chong-jie-fa-bao-li-f/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+```
+
+这样的动态规划算法中，还隐藏着递归的思想。
+
+例如，对于下图中数组：
+
+![截屏2021-08-12 下午6.14.49](/Users/geyishan/Library/Mobile Documents/com~apple~CloudDocs/截屏2021-08-12 下午6.14.49.png)
+
+例如第三个元素`[-6]`, dp[1]已经给出了-6前元素能得到的最大值，到-6这里就只需要考虑：前面得到的最大值加上-6 和 -6本身究竟谁大，谁就是以-6结尾的子序列的最大和，也就是dp[2]的值。
+
+之所以解释是因为开始看到这个解法的时候，总觉得人家没验证到所有条件，因为算法是从头逐个遍历过来的，那[3,-6]这样的不是从头开始的子序列是不是没考虑到呀？这肯定是错觉，因为前面已经解释了，dp[1]的值给出了-6前元素能得到的最大值，而这个值肯定是大于或等于3的。那么用这个最大值和-6相加 一定大于 3 和-6 相加。因此，非要说的话，这是一种“隐性”的考虑吧。
