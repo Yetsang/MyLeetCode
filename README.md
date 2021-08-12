@@ -460,3 +460,181 @@ public:
 
 之所以解释是因为开始看到这个解法的时候，总觉得人家没验证到所有条件，因为算法是从头逐个遍历过来的，那[3,-6]这样的不是从头开始的子序列是不是没考虑到呀？这肯定是错觉，因为前面已经解释了，dp[1]的值给出了-6前元素能得到的最大值，而这个值肯定是大于或等于3的。那么用这个最大值和-6相加 一定大于 3 和-6 相加。因此，非要说的话，这是一种“隐性”的考虑吧。
 
+因为只用到了当前项的前一项的dp值，因此可以采用一个整型值代替dp数组，降低空间复杂度。
+
+代码 如下：
+
+```c++
+class Solution
+{
+public:
+    int maxSubArray(vector<int> &nums)
+    {
+        //类似寻找最大最小值的题目，初始值一定要定义成理论上的最小最大值
+        int result = INT_MIN;
+        int numsSize = int(nums.size());
+        //因为只需要知道dp的前一项，我们用int代替一维数组
+        int dp(nums[0]);
+        result = dp;
+        for (int i = 1; i < numsSize; i++)
+        {
+            dp = max(dp + nums[i], nums[i]);
+            result = max(result, dp);
+        }
+
+        return result;
+    }
+};
+
+作者：pinku-2
+链接：https://leetcode-cn.com/problems/maximum-subarray/solution/zui-da-zi-xu-he-cshi-xian-si-chong-jie-fa-bao-li-f/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+```
+
+### 1.1.5 加一
+
+题目描述：
+
+```c
+给定一个由 整数 组成的 非空 数组所表示的非负整数，在该数的基础上加一。
+
+最高位数字存放在数组的首位， 数组中每个元素只存储单个数字。
+
+你可以假设除了整数 0 之外，这个整数不会以零开头。
+
+ 
+
+示例 1：
+
+输入：digits = [1,2,3]
+输出：[1,2,4]
+解释：输入数组表示数字 123。
+示例 2：
+
+输入：digits = [4,3,2,1]
+输出：[4,3,2,2]
+解释：输入数组表示数字 4321。
+示例 3：
+
+输入：digits = [0]
+输出：[1]
+ 
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/plus-one
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+```
+
+代码：
+
+```c++
+class Solution {
+public:
+    vector<int> plusOne(vector<int>& digits) {
+        for(int i=digits.size()-1;i>=0;i--)
+        {
+            ++digits[i];
+
+            if(digits[i]!=10)        //如果该位没有继续产生进位,则直接return 结果
+                return digits;
+            else
+                digits[i]=0;        //进位
+        }
+        digits.insert(digits.begin(), 1);       //如果首位也产生进位,才会执行到这条语句，否则循环中已经return了
+        return digits;
+    }
+};
+```
+
+### 1.1.6 合并两个有序数组
+
+问题描述：
+
+```c++
+给你两个有序整数数组 nums1 和 nums2，请你将 nums2 合并到 nums1 中，使 nums1 成为一个有序数组。
+
+初始化 nums1 和 nums2 的元素数量分别为 m 和 n 。你可以假设 nums1 的空间大小等于 m + n，这样它就有足够的空间保存来自 nums2 的元素。
+
+ 
+
+示例 1：
+
+输入：nums1 = [1,2,3,0,0,0], m = 3, nums2 = [2,5,6], n = 3
+输出：[1,2,2,3,5,6]
+示例 2：
+
+输入：nums1 = [1], m = 1, nums2 = [], n = 0
+输出：[1]
+ 
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/merge-sorted-array
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+```
+
+思路：
+
+采用双指针，另建一个m+n的数组，指向两个数组的头部，比较，将较小的放入暂存数组。
+
+代码如下：
+
+```c++
+class Solution {
+public:
+    void merge(vector<int>& nums1, int m, vector<int>& nums2, int n) {
+        int p1 = 0, p2 = 0;
+        int sorted[m + n];
+        int cur;
+        while (p1 < m || p2 < n) {
+            if (p1 == m) {
+                cur = nums2[p2++];
+            } else if (p2 == n) {
+                cur = nums1[p1++];
+            } else if (nums1[p1] < nums2[p2]) {
+                cur = nums1[p1++];
+            } else {
+                cur = nums2[p2++];
+            }
+            sorted[p1 + p2 - 1] = cur;
+        }
+        for (int i = 0; i != m + n; ++i) {
+            nums1[i] = sorted[i];
+        }
+    }
+};
+```
+
+看官方文件，还有逆向双指针的方法，不需要暂存数组。其基本思想是，将双指针指向两个数组有效元素的最后部分。项前迭代，将较大的元素放在数组1的末尾。
+
+代码如下：
+
+```c++
+
+class Solution {
+public:
+    void merge(vector<int>& nums1, int m, vector<int>& nums2, int n) {
+        int p1 = m - 1, p2 = n - 1;
+        int tail = m + n - 1;
+        int cur;
+        while (p1 >= 0 || p2 >= 0) {
+            if (p1 == -1) {
+                cur = nums2[p2--];
+            } else if (p2 == -1) {
+                cur = nums1[p1--];
+            } else if (nums1[p1] > nums2[p2]) {
+                cur = nums1[p1--];
+            } else {
+                cur = nums2[p2--];
+            }
+            nums1[tail--] = cur;
+        }
+    }
+};
+
+作者：LeetCode-Solution
+链接：https://leetcode-cn.com/problems/merge-sorted-array/solution/he-bing-liang-ge-you-xu-shu-zu-by-leetco-rrb0/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+```
+
