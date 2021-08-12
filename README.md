@@ -242,3 +242,95 @@ public:
 像官方这样写其实是最简洁明了的。
 
 所以，以后碰到这种情况，需要思考，究竟是否需要两边判断。
+
+### 1.1.3 搜索插入位置
+
+题目描述：
+
+```c++
+给定一个排序数组和一个目标值，在数组中找到目标值，并返回其索引。如果目标值不存在于数组中，返回它将会被按顺序插入的位置。
+
+请必须使用时间复杂度为 O(log n) 的算法。
+
+ 
+
+示例 1:
+
+输入: nums = [1,3,5,6], target = 5
+输出: 2
+示例 2:
+
+输入: nums = [1,3,5,6], target = 2
+输出: 1
+示例 3:
+
+输入: nums = [1,3,5,6], target = 7
+输出: 4
+示例 4:
+
+输入: nums = [1,3,5,6], target = 0
+输出: 0
+示例 5:
+
+输入: nums = [1], target = 0
+输出: 0
+
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/search-insert-position
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+```
+
+思路：
+
+我想的话，无非就是遍历，优化的话就是用二分查找。二分法的时间复杂度就是$O(logN)$
+
+代码如下：
+
+```c++
+class Solution {
+public:
+    int searchInsert(vector<int>& nums, int target) {
+        int n = nums.size();
+        int left = 0, right = n-1;
+        int mid;
+        while (left <= right)
+        {
+            mid = (right-left)/2 +left;
+            if (nums[mid] < target ){
+                left = mid+1;
+            }
+            else {
+                right = mid-1;
+            }
+        }
+        return left;
+    }
+};
+```
+
+总结：
+
+题目是比较简单的，终于有一道题我的思路是正确的了。
+
+**但是！！**
+
+我还是没有写对，主要还是出现在边界条件上。
+
+脑子里简单过一遍觉得自己会了，其实上手写了之后才发现根本不对。
+
+ 我一开始写的代码，left 和 right 的迭代如下：
+
+```c++
+left = mid;
+right = mid;
+```
+
+事实证明，这样会造成不收敛，程序死循环。
+
+以后不管多简单的问题，都要仔仔细细地写出来呀，自己水平还没高到有思路就能写对呢。
+
+重新查看二分查找算法，参考资料[在这里](http://data.biancheng.net/view/122.html)
+
+
+
