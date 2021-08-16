@@ -859,3 +859,87 @@ public:
 
 包括横向扫描法和二分法等，后续再看。
 
+### 1.2.3 有效括号
+
+题目描述：
+
+```c++
+给定一个只包括 '('，')'，'{'，'}'，'['，']' 的字符串 s ，判断字符串是否有效。
+
+有效字符串需满足：
+
+左括号必须用相同类型的右括号闭合。
+左括号必须以正确的顺序闭合。
+ 
+
+示例 1：
+
+输入：s = "()"
+输出：true
+示例 2：
+
+输入：s = "()[]{}"
+输出：true
+示例 3：
+
+输入：s = "(]"
+输出：false
+示例 4：
+
+输入：s = "([)]"
+输出：false
+示例 5：
+
+输入：s = "{[]}"
+输出：true
+ 
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/valid-parentheses
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+```
+
+思路：
+
+我的想法是利用栈，监测到是左括号，入栈，检测到是右括号，出栈。
+
+具体来说就是从前向后遍历，左括号入栈，右括号和栈顶比较，匹配出栈，否则返回错误；遍历完栈非空，返回错误；或者遍历到右括号，栈空，返回错误；否则是正确的。
+
+那么为了做好匹配工作，可以采用unordered_map存储，key为左括号，value为对应的右括号。
+
+感动中国，第一次和官方思路一致。
+
+```c++
+class Solution {
+public:
+    bool isValid(string s) {
+        int n = s.size();
+        if (n % 2 == 1) {
+            return false;
+        }
+
+        unordered_map<char, char> pairs = {
+            {')', '('},
+            {']', '['},
+            {'}', '{'}
+        };
+        stack<char> stk;
+        for (char ch: s) {
+            if (pairs.count(ch)) { //如果是右括号
+                if (stk.empty() || stk.top() != pairs[ch]) {
+                    return false;
+                }
+                stk.pop();
+            }
+            else {
+                stk.push(ch);
+            }
+        }
+        return stk.empty();
+    }
+};
+
+```
+
+另外，**要在构思时就列出错误情况，以免遗漏**。
+
