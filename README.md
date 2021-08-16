@@ -1085,3 +1085,76 @@ int KMP(const string& s, const string& p){
 著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
 ```
 
+### 1.2.5 excel 列表名字
+
+题目描述：
+
+```c++
+给你一个整数 columnNumber ，返回它在 Excel 表中相对应的列名称。
+
+例如：
+
+A -> 1
+B -> 2
+C -> 3
+...
+Z -> 26
+AA -> 27
+AB -> 28 
+...
+ 
+
+示例 1：
+
+输入：columnNumber = 1
+输出："A"
+示例 2：
+
+输入：columnNumber = 28
+输出："AB"
+示例 3：
+
+输入：columnNumber = 701
+输出："ZY"
+示例 4：
+
+输入：columnNumber = 2147483647
+输出："FXSHRXW"
+ 
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/excel-sheet-column-title
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+```
+
+思路：这道题我乍一看本来以为非常简单的26进制，但事实证明我想简单了。这个数值表示是1～26而不是0～25.
+
+这就造成如果像求解二进制一样求解的话，如26，除以26，余数为0，没有对应的字母。因此需要想办法对应起来。
+
+给出的办法是：输入数字减1，在对26求余，得到的余数加上A即使当前的字母。如26-1=25，25%26=25，A+25=Z;
+
+最后一步的加法是string 和 字符串的性质。
+
+代码如下：
+
+```c++
+class Solution {
+public:
+    string convertToTitle(int columnNumber) {
+        string ans;
+        while (columnNumber > 0) {
+            --columnNumber;
+            ans += columnNumber % 26 + 'A';
+            columnNumber /= 26;
+        }
+        reverse(ans.begin(), ans.end());
+        return ans;
+    }
+};
+
+作者：LeetCode-Solution
+链接：https://leetcode-cn.com/problems/excel-sheet-column-title/solution/excelbiao-lie-ming-cheng-by-leetcode-sol-hgj4/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+```
+
