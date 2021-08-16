@@ -943,3 +943,145 @@ public:
 
 另外，**要在构思时就列出错误情况，以免遗漏**。
 
+本题中主要用到的数据结构是[栈](http://c.biancheng.net/view/478.html)。
+
+### 1.2.4 strstr
+
+题目描述：
+
+```c++
+实现 strStr() 函数。
+
+给你两个字符串 haystack 和 needle ，请你在 haystack 字符串中找出 needle 字符串出现的第一个位置（下标从 0 开始）。如果不存在，则返回  -1 。
+
+ 
+
+说明：
+
+当 needle 是空字符串时，我们应当返回什么值呢？这是一个在面试中很好的问题。
+
+对于本题而言，当 needle 是空字符串时我们应当返回 0 。这与 C 语言的 strstr() 以及 Java 的 indexOf() 定义相符。
+
+ 
+
+示例 1：
+
+输入：haystack = "hello", needle = "ll"
+输出：2
+示例 2：
+
+输入：haystack = "aaaaa", needle = "bba"
+输出：-1
+示例 3：
+
+输入：haystack = "", needle = ""
+输出：0
+ 
+
+
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/implement-strstr
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+```
+
+思路：
+
+暴力解法：
+
+取needle的第一个字符，在haystack中寻找着一个字符，未找到，返回-1；找到后，从该位置取needle长度的子字符串和needle相比，相等则返回当前下标；否则继续寻找，遍历完成仍未找到，则返回-1。
+
+官方给出的暴力解法和这个差不多，代码如下：
+
+```c++
+class Solution {
+public:
+    int strStr(string haystack, string needle) {
+        int n = haystack.size(), m = needle.size();
+        for (int i = 0; i + m <= n; i++) {
+            bool flag = true;
+            for (int j = 0; j < m; j++) {
+                if (haystack[i + j] != needle[j]) {
+                    flag = false;
+                    break;
+                }
+            }
+            if (flag) {
+                return i;
+            }
+        }
+        return -1;
+    }
+};
+
+作者：LeetCode-Solution
+链接：https://leetcode-cn.com/problems/implement-strstr/solution/shi-xian-strstr-by-leetcode-solution-ds6y/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+```
+
+而真正意义上要讲的算法是KMP算法；
+
+这个算法我觉得非常难，前后看了三篇教程才看懂：
+
+1.[官方题解](https://leetcode-cn.com/problems/implement-strstr/solution/shi-xian-strstr-by-leetcode-solution-ds6y/)远离性讲得比较清楚，主要是从数学上讲的，比较难懂，但是简历了一些概念。
+
+2.宫水三叶大佬的[这篇解释](https://leetcode-cn.com/problems/implement-strstr/solution/shua-chuan-lc-shuang-bai-po-su-jie-fa-km-tb86/)图画的很好，很清楚地解释了KMP算法和暴力算法过程的不同。但是next的实现部分我觉得讲的太少了。
+
+3.[这篇文章](https://leetcode-cn.com/problems/implement-strstr/solution/tu-jie-kmp-zi-fu-chuan-pi-pei-wen-ti-by-c94sh/)算是对2的很好对补充，next的由来讲的很详细。
+
+理解完成后，又翻到了[这位大佬的教程](https://leetcode-cn.com/problems/implement-strstr/solution/dai-ma-sui-xiang-lu-kmpsuan-fa-xiang-jie-mfbs/)，感觉更有体系一些。他的下面这张动图很好地解释了next数组的生成。
+
+
+
+![KMP精讲3.gif](https://raw.githubusercontent.com/Yetsang/PicBed/main/img/1599638458-sHaHqX-KMP%E7%B2%BE%E8%AE%B23-20210816210006421.gif)
+
+配合上图，[参考资料3](https://leetcode-cn.com/problems/implement-strstr/solution/tu-jie-kmp-zi-fu-chuan-pi-pei-wen-ti-by-c94sh/)中的下面这段代码是我认为最好理解的代码。代码如下：
+
+```c++
+void GetNext(vector<int>& next, const string& p){
+    //i表示后缀尾，j表示前缀尾
+    //同时j表示i之前的最长相等前后缀长度
+    int i = 1, j = 0;
+    next[0] = 0;
+    for(;i<p.size(); ++i){
+        while(j>0 && p[i] != p[j]){ 
+            //当i和j不匹配时，j向前跳转
+            //当j已经跳转到开头时，不再跳转，防止死循环
+            j = next[j-1];
+        }
+        if(p[i] == p[j]) j++;
+        next[i] = j;
+    }
+}
+
+作者：horizon-29
+链接：https://leetcode-cn.com/problems/implement-strstr/solution/tu-jie-kmp-zi-fu-chuan-pi-pei-wen-ti-by-c94sh/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+```
+
+这位大佬写的匹配代码也是我认为最简单的了。
+
+```c++
+int KMP(const string& s, const string& p){
+    vector<int> next(p.size(),0);
+    GetNext(next,p);
+    for(int i=0,j=0; i<s.size(); ++i){
+        while(j > 0 && s[i] != p[j]){
+            j = next[j-1];
+        }
+        if(s[i] == p[j]){
+            j++;
+        }
+        if(j == p.size())   return i - p.size() + 1;
+    }
+    return -1;
+}
+
+作者：horizon-29
+链接：https://leetcode-cn.com/problems/implement-strstr/solution/tu-jie-kmp-zi-fu-chuan-pi-pei-wen-ti-by-c94sh/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+```
+
