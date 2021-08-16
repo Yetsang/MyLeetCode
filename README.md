@@ -638,3 +638,523 @@ public:
 著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
 ```
 
+## 1.2 字符串
+
+### 1.2.1 罗马数字转整数
+
+题目描述：
+
+```c++
+罗马数字包含以下七种字符: I， V， X， L，C，D 和 M。
+
+字符          数值
+I             1
+V             5
+X             10
+L             50
+C             100
+D             500
+M             1000
+例如， 罗马数字 2 写做 II ，即为两个并列的 1。12 写做 XII ，即为 X + II 。 27 写做  XXVII, 即为 XX + V + II 。
+
+通常情况下，罗马数字中小的数字在大的数字的右边。但也存在特例，例如 4 不写做 IIII，而是 IV。数字 1 在数字 5 的左边，所表示的数等于大数 5 减小数 1 得到的数值 4 。同样地，数字 9 表示为 IX。这个特殊的规则只适用于以下六种情况：
+
+I 可以放在 V (5) 和 X (10) 的左边，来表示 4 和 9。
+X 可以放在 L (50) 和 C (100) 的左边，来表示 40 和 90。 
+C 可以放在 D (500) 和 M (1000) 的左边，来表示 400 和 900。
+给定一个罗马数字，将其转换成整数。输入确保在 1 到 3999 的范围内。
+
+ 
+
+示例 1:
+
+输入: "III"
+输出: 3
+示例 2:
+
+输入: "IV"
+输出: 4
+示例 3:
+
+输入: "IX"
+输出: 9
+示例 4:
+
+输入: "LVIII"
+输出: 58
+解释: L = 50, V= 5, III = 3.
+示例 5:
+
+输入: "MCMXCIV"
+输出: 1994
+解释: M = 1000, CM = 900, XC = 90, IV = 4.
+
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/roman-to-integer
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+```
+
+思路：
+
+我的思路是就是按照各种情况，从头往下写，用if else 把所有情况都表示出来，但是这种方法太笨了。代码类似下面的：
+
+```c
+/**
+ * @param {string} s
+ * @return {number}
+ */
+var romanToInt = function(s) {
+  const n = s.length;
+  let i = 0;
+  let res = 0;
+  while(i < n) {
+    if (s[i] === 'M') {
+      res += 1000;
+      i++;
+    } else if (s[i] === 'C' && s[i+1] === 'M') {
+      res += 900;
+      i += 2;
+    } else if (s[i] === 'D') {
+      res += 500;
+      i++;
+    } else if (s[i] === 'C' && s[i+1] === 'D') {
+      res += 400;
+      i += 2;
+    } else if (s[i] === 'C') {
+      res += 100;
+      i++;
+    } else if (s[i] === 'X' && s[i+1] === 'C') {
+      res += 90;
+      i += 2;
+    } else if (s[i] === 'L') {
+      res += 50;
+      i++;
+    } else if (s[i] === 'X' && s[i+1] === 'L') {
+      res += 40;
+      i += 2;
+    } else if (s[i] === 'X') {
+      res += 10;
+      i++;
+    } else if (s[i] === 'I' && s[i+1] === 'X') {
+      res += 9;
+      i += 2;
+    } else if (s[i] === 'V') {
+      res += 5;
+      i++;
+    } else if (s[i] === 'I' && s[i+1] === 'V') {
+      res += 4;
+      i += 2;
+    } else if (s[i] === 'I') {
+      res += 1;
+      i++;
+    } 
+  }
+  return res;
+};
+```
+
+题解中的思路更优秀。思路如下：
+
+![](/Users/geyishan/Library/Mobile Documents/com~apple~CloudDocs/截屏2021-08-16 下午2.44.47.png)
+
+官方代码如下：
+
+```c++
+class Solution {
+private:
+    unordered_map<char, int> symbolValues = {
+        {'I', 1},
+        {'V', 5},
+        {'X', 10},
+        {'L', 50},
+        {'C', 100},
+        {'D', 500},
+        {'M', 1000},
+    };
+
+public:
+    int romanToInt(string s) {
+        int ans = 0;
+        int n = s.length();
+        for (int i = 0; i < n; ++i) {
+            int value = symbolValues[s[i]];
+            if (i < n - 1 && value < symbolValues[s[i + 1]]) {
+                ans -= value;
+            } else {
+                ans += value;
+            }
+        }
+        return ans;
+    }
+};
+
+作者：LeetCode-Solution
+链接：https://leetcode-cn.com/problems/roman-to-integer/solution/luo-ma-shu-zi-zhuan-zheng-shu-by-leetcod-w55p/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+```
+
+首先用哈希表([unordered_map](http://c.biancheng.net/view/7231.html))将字符对应的数值存储起来，然后根据规律写出循环，很快就能得到结果。我果然是个笨比。
+
+### 1.2.2 最长公共前缀
+
+题目描述：
+
+```c++
+编写一个函数来查找字符串数组中的最长公共前缀。
+
+如果不存在公共前缀，返回空字符串 ""。
+
+ 
+
+示例 1：
+
+输入：strs = ["flower","flow","flight"]
+输出："fl"
+示例 2：
+
+输入：strs = ["dog","racecar","car"]
+输出：""
+解释：输入不存在公共前缀。
+ 
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/longest-common-prefix
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+```
+
+思路：
+
+就是对每个字符串，先从第一个字符开始，若相等，则继续扫描各个字符串的第二个。直到遇到不相等或字符串结束。
+
+这也是题解中给出的解法之一，代码如下：
+
+```c++
+class Solution {
+public:
+    string longestCommonPrefix(vector<string>& strs) {
+        if (!strs.size()) {
+            return "";
+        }
+        int length = strs[0].size();
+        int count = strs.size();
+        for (int i = 0; i < length; ++i) {
+            char c = strs[0][i];
+            for (int j = 1; j < count; ++j) {
+                if (i == strs[j].size() || strs[j][i] != c) {
+                    return strs[0].substr(0, i);
+                }
+            }
+        }
+        return strs[0];
+    }
+};
+
+```
+
+本题目中，主要应用了 [vector](https://www.w3cschool.cn/cpp/cpp-i6da2pq0.html) 和 [string](http://c.biancheng.net/cpp/biancheng/view/3284.html) 两个数据结构。
+
+其他解法：
+
+包括横向扫描法和二分法等，后续再看。
+
+### 1.2.3 有效括号
+
+题目描述：
+
+```c++
+给定一个只包括 '('，')'，'{'，'}'，'['，']' 的字符串 s ，判断字符串是否有效。
+
+有效字符串需满足：
+
+左括号必须用相同类型的右括号闭合。
+左括号必须以正确的顺序闭合。
+ 
+
+示例 1：
+
+输入：s = "()"
+输出：true
+示例 2：
+
+输入：s = "()[]{}"
+输出：true
+示例 3：
+
+输入：s = "(]"
+输出：false
+示例 4：
+
+输入：s = "([)]"
+输出：false
+示例 5：
+
+输入：s = "{[]}"
+输出：true
+ 
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/valid-parentheses
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+```
+
+思路：
+
+我的想法是利用栈，监测到是左括号，入栈，检测到是右括号，出栈。
+
+具体来说就是从前向后遍历，左括号入栈，右括号和栈顶比较，匹配出栈，否则返回错误；遍历完栈非空，返回错误；或者遍历到右括号，栈空，返回错误；否则是正确的。
+
+那么为了做好匹配工作，可以采用unordered_map存储，key为左括号，value为对应的右括号。
+
+感动中国，第一次和官方思路一致。
+
+```c++
+class Solution {
+public:
+    bool isValid(string s) {
+        int n = s.size();
+        if (n % 2 == 1) {
+            return false;
+        }
+
+        unordered_map<char, char> pairs = {
+            {')', '('},
+            {']', '['},
+            {'}', '{'}
+        };
+        stack<char> stk;
+        for (char ch: s) {
+            if (pairs.count(ch)) { //如果是右括号
+                if (stk.empty() || stk.top() != pairs[ch]) {
+                    return false;
+                }
+                stk.pop();
+            }
+            else {
+                stk.push(ch);
+            }
+        }
+        return stk.empty();
+    }
+};
+
+```
+
+另外，**要在构思时就列出错误情况，以免遗漏**。
+
+本题中主要用到的数据结构是[栈](http://c.biancheng.net/view/478.html)。
+
+### 1.2.4 strstr
+
+题目描述：
+
+```c++
+实现 strStr() 函数。
+
+给你两个字符串 haystack 和 needle ，请你在 haystack 字符串中找出 needle 字符串出现的第一个位置（下标从 0 开始）。如果不存在，则返回  -1 。
+
+ 
+
+说明：
+
+当 needle 是空字符串时，我们应当返回什么值呢？这是一个在面试中很好的问题。
+
+对于本题而言，当 needle 是空字符串时我们应当返回 0 。这与 C 语言的 strstr() 以及 Java 的 indexOf() 定义相符。
+
+ 
+
+示例 1：
+
+输入：haystack = "hello", needle = "ll"
+输出：2
+示例 2：
+
+输入：haystack = "aaaaa", needle = "bba"
+输出：-1
+示例 3：
+
+输入：haystack = "", needle = ""
+输出：0
+ 
+
+
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/implement-strstr
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+```
+
+思路：
+
+暴力解法：
+
+取needle的第一个字符，在haystack中寻找着一个字符，未找到，返回-1；找到后，从该位置取needle长度的子字符串和needle相比，相等则返回当前下标；否则继续寻找，遍历完成仍未找到，则返回-1。
+
+官方给出的暴力解法和这个差不多，代码如下：
+
+```c++
+class Solution {
+public:
+    int strStr(string haystack, string needle) {
+        int n = haystack.size(), m = needle.size();
+        for (int i = 0; i + m <= n; i++) {
+            bool flag = true;
+            for (int j = 0; j < m; j++) {
+                if (haystack[i + j] != needle[j]) {
+                    flag = false;
+                    break;
+                }
+            }
+            if (flag) {
+                return i;
+            }
+        }
+        return -1;
+    }
+};
+
+作者：LeetCode-Solution
+链接：https://leetcode-cn.com/problems/implement-strstr/solution/shi-xian-strstr-by-leetcode-solution-ds6y/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+```
+
+而真正意义上要讲的算法是KMP算法；
+
+这个算法我觉得非常难，前后看了三篇教程才看懂：
+
+1.[官方题解](https://leetcode-cn.com/problems/implement-strstr/solution/shi-xian-strstr-by-leetcode-solution-ds6y/)远离性讲得比较清楚，主要是从数学上讲的，比较难懂，但是简历了一些概念。
+
+2.宫水三叶大佬的[这篇解释](https://leetcode-cn.com/problems/implement-strstr/solution/shua-chuan-lc-shuang-bai-po-su-jie-fa-km-tb86/)图画的很好，很清楚地解释了KMP算法和暴力算法过程的不同。但是next的实现部分我觉得讲的太少了。
+
+3.[这篇文章](https://leetcode-cn.com/problems/implement-strstr/solution/tu-jie-kmp-zi-fu-chuan-pi-pei-wen-ti-by-c94sh/)算是对2的很好对补充，next的由来讲的很详细。
+
+理解完成后，又翻到了[这位大佬的教程](https://leetcode-cn.com/problems/implement-strstr/solution/dai-ma-sui-xiang-lu-kmpsuan-fa-xiang-jie-mfbs/)，感觉更有体系一些。他的下面这张动图很好地解释了next数组的生成。
+
+
+
+![KMP精讲3.gif](https://raw.githubusercontent.com/Yetsang/PicBed/main/img/1599638458-sHaHqX-KMP%E7%B2%BE%E8%AE%B23-20210816210006421.gif)
+
+配合上图，[参考资料3](https://leetcode-cn.com/problems/implement-strstr/solution/tu-jie-kmp-zi-fu-chuan-pi-pei-wen-ti-by-c94sh/)中的下面这段代码是我认为最好理解的代码。代码如下：
+
+```c++
+void GetNext(vector<int>& next, const string& p){
+    //i表示后缀尾，j表示前缀尾
+    //同时j表示i之前的最长相等前后缀长度
+    int i = 1, j = 0;
+    next[0] = 0;
+    for(;i<p.size(); ++i){
+        while(j>0 && p[i] != p[j]){ 
+            //当i和j不匹配时，j向前跳转
+            //当j已经跳转到开头时，不再跳转，防止死循环
+            j = next[j-1];
+        }
+        if(p[i] == p[j]) j++;
+        next[i] = j;
+    }
+}
+
+作者：horizon-29
+链接：https://leetcode-cn.com/problems/implement-strstr/solution/tu-jie-kmp-zi-fu-chuan-pi-pei-wen-ti-by-c94sh/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+```
+
+这位大佬写的匹配代码也是我认为最简单的了。
+
+```c++
+int KMP(const string& s, const string& p){
+    vector<int> next(p.size(),0);
+    GetNext(next,p);
+    for(int i=0,j=0; i<s.size(); ++i){
+        while(j > 0 && s[i] != p[j]){
+            j = next[j-1];
+        }
+        if(s[i] == p[j]){
+            j++;
+        }
+        if(j == p.size())   return i - p.size() + 1;
+    }
+    return -1;
+}
+
+作者：horizon-29
+链接：https://leetcode-cn.com/problems/implement-strstr/solution/tu-jie-kmp-zi-fu-chuan-pi-pei-wen-ti-by-c94sh/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+```
+
+### 1.2.5 excel 列表名字
+
+题目描述：
+
+```c++
+给你一个整数 columnNumber ，返回它在 Excel 表中相对应的列名称。
+
+例如：
+
+A -> 1
+B -> 2
+C -> 3
+...
+Z -> 26
+AA -> 27
+AB -> 28 
+...
+ 
+
+示例 1：
+
+输入：columnNumber = 1
+输出："A"
+示例 2：
+
+输入：columnNumber = 28
+输出："AB"
+示例 3：
+
+输入：columnNumber = 701
+输出："ZY"
+示例 4：
+
+输入：columnNumber = 2147483647
+输出："FXSHRXW"
+ 
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/excel-sheet-column-title
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+```
+
+思路：这道题我乍一看本来以为非常简单的26进制，但事实证明我想简单了。这个数值表示是1～26而不是0～25.
+
+这就造成如果像求解二进制一样求解的话，如26，除以26，余数为0，没有对应的字母。因此需要想办法对应起来。
+
+给出的办法是：输入数字减1，在对26求余，得到的余数加上A即使当前的字母。如26-1=25，25%26=25，A+25=Z;
+
+最后一步的加法是string 和 字符串的性质。
+
+代码如下：
+
+```c++
+class Solution {
+public:
+    string convertToTitle(int columnNumber) {
+        string ans;
+        while (columnNumber > 0) {
+            --columnNumber;
+            ans += columnNumber % 26 + 'A';
+            columnNumber /= 26;
+        }
+        reverse(ans.begin(), ans.end());
+        return ans;
+    }
+};
+
+作者：LeetCode-Solution
+链接：https://leetcode-cn.com/problems/excel-sheet-column-title/solution/excelbiao-lie-ming-cheng-by-leetcode-sol-hgj4/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+```
+
