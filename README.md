@@ -1235,3 +1235,134 @@ public:
 著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
 ```
 
+### 1.2.7 最长回文子字符串
+
+题目描述：
+
+```c++
+示例 1：
+
+输入：s = "babad"
+输出："bab"
+解释："aba" 同样是符合题意的答案。
+示例 2：
+
+输入：s = "cbbd"
+输出："bb"
+示例 3：
+
+输入：s = "a"
+输出："a"
+示例 4：
+
+输入：s = "ac"
+输出："a"
+ 
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/longest-palindromic-substring
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+```
+
+思路：
+
+主要思路有两种：
+
+第一种为动态规划方法。
+
+![截屏2021-08-17 上午11.38.42](https://raw.githubusercontent.com/Yetsang/PicBed/main/img/%E6%88%AA%E5%B1%8F2021-08-17%20%E4%B8%8A%E5%8D%8811.38.42.png)
+
+上图显示算法的代码如下：
+
+```c++
+class Solution {
+public:
+    string longestPalindrome(string s) {
+        int n = s.size();
+        if (n < 2) {
+            return s;
+        }
+
+        int maxLen = 1;
+        int begin = 0;
+        // dp[i][j] 表示 s[i..j] 是否是回文串
+        vector<vector<int>> dp(n, vector<int>(n));
+        // 初始化：所有长度为 1 的子串都是回文串
+        for (int i = 0; i < n; i++) {
+            dp[i][i] = true;
+        }
+        // 递推开始
+        // 先枚举子串长度
+        for (int L = 2; L <= n; L++) {
+            // 枚举左边界，左边界的上限设置可以宽松一些
+            for (int i = 0; i < n; i++) {
+                // 由 L 和 i 可以确定右边界，即 j - i + 1 = L 得
+                int j = L + i - 1;
+                // 如果右边界越界，就可以退出当前循环
+                if (j >= n) {
+                    break;
+                }
+
+                if (s[i] != s[j]) {
+                    dp[i][j] = false;
+                } else {
+                    if (j - i < 3) {
+                        dp[i][j] = true; //只有两个元素，两元素相等则为回文
+                    } else {
+                        dp[i][j] = dp[i + 1][j - 1]; //超过两元素，取决于它“里面”一层的字符串是否是回文
+                    }
+                }
+
+                // 只要 dp[i][L] == true 成立，就表示子串 s[i..L] 是回文，此时记录回文长度和起始位置
+                if (dp[i][j] && j - i + 1 > maxLen) {
+                    maxLen = j - i + 1;
+                    begin = i;
+                }
+            }
+        }
+        return s.substr(begin, maxLen);
+    }
+};
+```
+
+第二种方法为采用中间扩展法。就是从中间向两端扩展，直到两端不等，扩展停止。
+
+代码如下：
+
+```c++
+class Solution {
+public:
+    pair<int, int> expandAroundCenter(const string& s, int left, int right) {
+        while (left >= 0 && right < s.size() && s[left] == s[right]) {
+            --left;
+            ++right;
+        }
+        return {left + 1, right - 1};
+    }
+
+    string longestPalindrome(string s) {
+        int start = 0, end = 0;
+        for (int i = 0; i < s.size(); ++i) {
+            auto [left1, right1] = expandAroundCenter(s, i, i);
+            auto [left2, right2] = expandAroundCenter(s, i, i + 1);
+            if (right1 - left1 > end - start) {
+                start = left1;
+                end = right1;
+            }
+            if (right2 - left2 > end - start) {
+                start = left2;
+                end = right2;
+            }
+        }
+        return s.substr(start, end - start + 1);
+    }
+};
+
+作者：LeetCode-Solution
+链接：https://leetcode-cn.com/problems/longest-palindromic-substring/solution/zui-chang-hui-wen-zi-chuan-by-leetcode-solution/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+```
+
+**注意 有两种扩展起源**
+
