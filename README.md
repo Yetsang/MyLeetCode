@@ -1158,3 +1158,337 @@ public:
 著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
 ```
 
+### 1.2.6 无重复的最长子串
+
+题目描述：
+
+```c++
+给定一个字符串 s ，请你找出其中不含有重复字符的 最长子串 的长度。
+
+ 
+
+示例 1:
+
+输入: s = "abcabcbb"
+输出: 3 
+解释: 因为无重复字符的最长子串是 "abc"，所以其长度为 3。
+示例 2:
+
+输入: s = "bbbbb"
+输出: 1
+解释: 因为无重复字符的最长子串是 "b"，所以其长度为 1。
+示例 3:
+
+输入: s = "pwwkew"
+输出: 3
+解释: 因为无重复字符的最长子串是 "wke"，所以其长度为 3。
+     请注意，你的答案必须是 子串 的长度，"pwke" 是一个子序列，不是子串。
+示例 4:
+
+输入: s = ""
+输出: 0
+ 
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/longest-substring-without-repeating-characters
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+```
+
+思路：采用滑动窗口法。这个我以前做过，有印象。
+
+具体为：采用set结构存储非重复字符。取left指向0位置。遍历字符串，若遇到set中存在的字符，将set中的s[left]删掉。left++，这一阶段的子字符串长度为i-left+1。从头遍历到尾，得到的最大长度即为所求。
+
+**注意：本题目中的移除s[left]的操作，是在只求长度的情况下才成立的。** 比如题目要求中的第三个例子，遍历到pww时，存在重复元素。移除s[left]移除的是p，留下的是ww。这样本阶段最长子字符串的长度不变，但是如果要返回最长子字符串的话就不对了。
+
+我自己的代码就不贴了，太难看，参考代码如下：
+
+```c++
+class Solution {
+public:
+    int lengthOfLongestSubstring(string s) {
+        // 哈希集合，记录每个字符是否出现过
+        unordered_set<char> occ;
+        int n = s.size();
+        // 右指针，初始值为 -1，相当于我们在字符串的左边界的左侧，还没有开始移动
+        int rk = -1, ans = 0;
+        // 枚举左指针的位置，初始值隐性地表示为 -1
+        for (int i = 0; i < n; ++i) {
+            if (i != 0) {
+                // 左指针向右移动一格，移除一个字符
+                occ.erase(s[i - 1]);
+            }
+            while (rk + 1 < n && !occ.count(s[rk + 1])) {
+                // 不断地移动右指针
+                occ.insert(s[rk + 1]);
+                ++rk;
+            }
+            // 第 i 到 rk 个字符是一个极长的无重复字符子串
+            ans = max(ans, rk - i + 1);
+        }
+        return ans;
+    }
+};
+
+作者：LeetCode-Solution
+链接：https://leetcode-cn.com/problems/longest-substring-without-repeating-characters/solution/wu-zhong-fu-zi-fu-de-zui-chang-zi-chuan-by-leetc-2/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+```
+
+### 1.2.7 最长回文子字符串
+
+题目描述：
+
+```c++
+示例 1：
+
+输入：s = "babad"
+输出："bab"
+解释："aba" 同样是符合题意的答案。
+示例 2：
+
+输入：s = "cbbd"
+输出："bb"
+示例 3：
+
+输入：s = "a"
+输出："a"
+示例 4：
+
+输入：s = "ac"
+输出："a"
+ 
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/longest-palindromic-substring
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+```
+
+思路：
+
+主要思路有两种：
+
+第一种为动态规划方法。
+
+![截屏2021-08-17 上午11.38.42](https://raw.githubusercontent.com/Yetsang/PicBed/main/img/%E6%88%AA%E5%B1%8F2021-08-17%20%E4%B8%8A%E5%8D%8811.38.42.png)
+
+上图显示算法的代码如下：
+
+```c++
+class Solution {
+public:
+    string longestPalindrome(string s) {
+        int n = s.size();
+        if (n < 2) {
+            return s;
+        }
+
+        int maxLen = 1;
+        int begin = 0;
+        // dp[i][j] 表示 s[i..j] 是否是回文串
+        vector<vector<int>> dp(n, vector<int>(n));
+        // 初始化：所有长度为 1 的子串都是回文串
+        for (int i = 0; i < n; i++) {
+            dp[i][i] = true;
+        }
+        // 递推开始
+        // 先枚举子串长度
+        for (int L = 2; L <= n; L++) {
+            // 枚举左边界，左边界的上限设置可以宽松一些
+            for (int i = 0; i < n; i++) {
+                // 由 L 和 i 可以确定右边界，即 j - i + 1 = L 得
+                int j = L + i - 1;
+                // 如果右边界越界，就可以退出当前循环
+                if (j >= n) {
+                    break;
+                }
+
+                if (s[i] != s[j]) {
+                    dp[i][j] = false;
+                } else {
+                    if (j - i < 3) {
+                        dp[i][j] = true; //只有两个元素，两元素相等则为回文
+                    } else {
+                        dp[i][j] = dp[i + 1][j - 1]; //超过两元素，取决于它“里面”一层的字符串是否是回文
+                    }
+                }
+
+                // 只要 dp[i][L] == true 成立，就表示子串 s[i..L] 是回文，此时记录回文长度和起始位置
+                if (dp[i][j] && j - i + 1 > maxLen) {
+                    maxLen = j - i + 1;
+                    begin = i;
+                }
+            }
+        }
+        return s.substr(begin, maxLen);
+    }
+};
+```
+
+第二种方法为采用中间扩展法。就是从中间向两端扩展，直到两端不等，扩展停止。
+
+代码如下：
+
+```c++
+class Solution {
+public:
+    pair<int, int> expandAroundCenter(const string& s, int left, int right) {
+        while (left >= 0 && right < s.size() && s[left] == s[right]) {
+            --left;
+            ++right;
+        }
+        return {left + 1, right - 1};
+    }
+
+    string longestPalindrome(string s) {
+        int start = 0, end = 0;
+        for (int i = 0; i < s.size(); ++i) {
+            auto [left1, right1] = expandAroundCenter(s, i, i);
+            auto [left2, right2] = expandAroundCenter(s, i, i + 1);
+            if (right1 - left1 > end - start) {
+                start = left1;
+                end = right1;
+            }
+            if (right2 - left2 > end - start) {
+                start = left2;
+                end = right2;
+            }
+        }
+        return s.substr(start, end - start + 1);
+    }
+};
+
+作者：LeetCode-Solution
+链接：https://leetcode-cn.com/problems/longest-palindromic-substring/solution/zui-chang-hui-wen-zi-chuan-by-leetcode-solution/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+```
+
+**注意 有两种扩展起源**
+
+### 1.2.8 整数转罗马数字
+
+题目描述：
+
+```c++
+罗马数字包含以下七种字符： I， V， X， L，C，D 和 M。
+
+字符          数值
+I             1
+V             5
+X             10
+L             50
+C             100
+D             500
+M             1000
+例如， 罗马数字 2 写做 II ，即为两个并列的 1。12 写做 XII ，即为 X + II 。 27 写做  XXVII, 即为 XX + V + II 。
+
+通常情况下，罗马数字中小的数字在大的数字的右边。但也存在特例，例如 4 不写做 IIII，而是 IV。数字 1 在数字 5 的左边，所表示的数等于大数 5 减小数 1 得到的数值 4 。同样地，数字 9 表示为 IX。这个特殊的规则只适用于以下六种情况：
+
+I 可以放在 V (5) 和 X (10) 的左边，来表示 4 和 9。
+X 可以放在 L (50) 和 C (100) 的左边，来表示 40 和 90。 
+C 可以放在 D (500) 和 M (1000) 的左边，来表示 400 和 900。
+给你一个整数，将其转为罗马数字。
+
+ 
+
+示例 1:
+
+输入: num = 3
+输出: "III"
+示例 2:
+
+输入: num = 4
+输出: "IV"
+示例 3:
+
+输入: num = 9
+输出: "IX"
+示例 4:
+
+输入: num = 58
+输出: "LVIII"
+解释: L = 50, V = 5, III = 3.
+示例 5:
+
+输入: num = 1994
+输出: "MCMXCIV"
+解释: M = 1000, CM = 900, XC = 90, IV = 4.
+ 
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/integer-to-roman
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+```
+
+思路：
+
+我的思路是：按位转化。
+
+通过除法和取余相结合，取出每一位。对于千位来说，只能是0123，那么就可以利用for循环，有几个千位就加几个M，对于其他的位（拿个位举例），首先看是不是4或9，然后再看是否大于等于5，小于5，（不可能为4），则用for循环，加I，大于等于5，则对5取余，写成V+余数个I。
+
+这样的做法思路简单，但是ifelse 情况比较多，容易写乱。
+
+官方给出的参考程序很好地解决了这个问题,且执行效率快得多。
+
+```c++
+const string thousands[] = {"", "M", "MM", "MMM"};
+const string hundreds[]  = {"", "C", "CC", "CCC", "CD", "D", "DC", "DCC", "DCCC", "CM"};
+const string tens[]      = {"", "X", "XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC"};
+const string ones[]      = {"", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"};
+
+class Solution {
+public:
+    string intToRoman(int num) {
+        return thousands[num / 1000] + hundreds[num % 1000 / 100] + tens[num % 100 / 10] + ones[num % 10];
+    }
+};
+
+作者：LeetCode-Solution
+链接：https://leetcode-cn.com/problems/integer-to-roman/solution/zheng-shu-zhuan-luo-ma-shu-zi-by-leetcod-75rs/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+```
+
+官方题解中的另一种方法其实也是我的思路的优化版，将复杂的if else 判断用简单的循环写出。代码如下：
+
+```c++
+const pair<int, string> valueSymbols[] = {
+    {1000, "M"},
+    {900,  "CM"},
+    {500,  "D"},
+    {400,  "CD"},
+    {100,  "C"},
+    {90,   "XC"},
+    {50,   "L"},
+    {40,   "XL"},
+    {10,   "X"},
+    {9,    "IX"},
+    {5,    "V"},
+    {4,    "IV"},
+    {1,    "I"},
+};
+
+class Solution {
+public:
+    string intToRoman(int num) {
+        string roman;
+        for (const auto &[value, symbol] : valueSymbols) {
+            while (num >= value) {
+                num -= value;
+                roman += symbol;
+            }
+            if (num == 0) {
+                break;
+            }
+        }
+        return roman;
+    }
+};
+
+作者：LeetCode-Solution
+链接：https://leetcode-cn.com/problems/integer-to-roman/solution/zheng-shu-zhuan-luo-ma-shu-zi-by-leetcod-75rs/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+```
+
