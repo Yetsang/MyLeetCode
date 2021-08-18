@@ -1366,3 +1366,129 @@ public:
 
 **注意 有两种扩展起源**
 
+### 1.2.8 整数转罗马数字
+
+题目描述：
+
+```c++
+罗马数字包含以下七种字符： I， V， X， L，C，D 和 M。
+
+字符          数值
+I             1
+V             5
+X             10
+L             50
+C             100
+D             500
+M             1000
+例如， 罗马数字 2 写做 II ，即为两个并列的 1。12 写做 XII ，即为 X + II 。 27 写做  XXVII, 即为 XX + V + II 。
+
+通常情况下，罗马数字中小的数字在大的数字的右边。但也存在特例，例如 4 不写做 IIII，而是 IV。数字 1 在数字 5 的左边，所表示的数等于大数 5 减小数 1 得到的数值 4 。同样地，数字 9 表示为 IX。这个特殊的规则只适用于以下六种情况：
+
+I 可以放在 V (5) 和 X (10) 的左边，来表示 4 和 9。
+X 可以放在 L (50) 和 C (100) 的左边，来表示 40 和 90。 
+C 可以放在 D (500) 和 M (1000) 的左边，来表示 400 和 900。
+给你一个整数，将其转为罗马数字。
+
+ 
+
+示例 1:
+
+输入: num = 3
+输出: "III"
+示例 2:
+
+输入: num = 4
+输出: "IV"
+示例 3:
+
+输入: num = 9
+输出: "IX"
+示例 4:
+
+输入: num = 58
+输出: "LVIII"
+解释: L = 50, V = 5, III = 3.
+示例 5:
+
+输入: num = 1994
+输出: "MCMXCIV"
+解释: M = 1000, CM = 900, XC = 90, IV = 4.
+ 
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/integer-to-roman
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+```
+
+思路：
+
+我的思路是：按位转化。
+
+通过除法和取余相结合，取出每一位。对于千位来说，只能是0123，那么就可以利用for循环，有几个千位就加几个M，对于其他的位（拿个位举例），首先看是不是4或9，然后再看是否大于等于5，小于5，（不可能为4），则用for循环，加I，大于等于5，则对5取余，写成V+余数个I。
+
+这样的做法思路简单，但是ifelse 情况比较多，容易写乱。
+
+官方给出的参考程序很好地解决了这个问题,且执行效率快得多。
+
+```c++
+const string thousands[] = {"", "M", "MM", "MMM"};
+const string hundreds[]  = {"", "C", "CC", "CCC", "CD", "D", "DC", "DCC", "DCCC", "CM"};
+const string tens[]      = {"", "X", "XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC"};
+const string ones[]      = {"", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"};
+
+class Solution {
+public:
+    string intToRoman(int num) {
+        return thousands[num / 1000] + hundreds[num % 1000 / 100] + tens[num % 100 / 10] + ones[num % 10];
+    }
+};
+
+作者：LeetCode-Solution
+链接：https://leetcode-cn.com/problems/integer-to-roman/solution/zheng-shu-zhuan-luo-ma-shu-zi-by-leetcod-75rs/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+```
+
+官方题解中的另一种方法其实也是我的思路的优化版，将复杂的if else 判断用简单的循环写出。代码如下：
+
+```c++
+const pair<int, string> valueSymbols[] = {
+    {1000, "M"},
+    {900,  "CM"},
+    {500,  "D"},
+    {400,  "CD"},
+    {100,  "C"},
+    {90,   "XC"},
+    {50,   "L"},
+    {40,   "XL"},
+    {10,   "X"},
+    {9,    "IX"},
+    {5,    "V"},
+    {4,    "IV"},
+    {1,    "I"},
+};
+
+class Solution {
+public:
+    string intToRoman(int num) {
+        string roman;
+        for (const auto &[value, symbol] : valueSymbols) {
+            while (num >= value) {
+                num -= value;
+                roman += symbol;
+            }
+            if (num == 0) {
+                break;
+            }
+        }
+        return roman;
+    }
+};
+
+作者：LeetCode-Solution
+链接：https://leetcode-cn.com/problems/integer-to-roman/solution/zheng-shu-zhuan-luo-ma-shu-zi-by-leetcod-75rs/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+```
+
