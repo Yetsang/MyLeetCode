@@ -1576,3 +1576,275 @@ int main() {
 
 ```
 
+### 2.1.2 等和数组问题（01背包变体）
+
+题目描述：
+
+```c
+给你一个 只包含正整数 的 非空 数组 nums 。请你判断是否可以将这个数组分割成两个子集，使得两个子集的元素和相等。
+
+ 
+
+示例 1：
+
+输入：nums = [1,5,11,5]
+输出：true
+解释：数组可以分割成 [1, 5, 5] 和 [11] 。
+示例 2：
+
+输入：nums = [1,2,3,5]
+输出：false
+解释：数组不能分割成两个元素和相等的子集。
+ 
+
+提示：
+
+1 <= nums.length <= 200
+1 <= nums[i] <= 100
+
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/partition-equal-subset-sum
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+```
+
+代码：
+
+```c++
+class Solution {
+public:
+    bool canPartition(vector<int>& nums) {
+    //转化为动态规划背包问题实现
+    //背包容量为sum/2；
+    //待放入物品就是集合中的各个元素；
+    //物品的重量和价值都是元素的数值；
+    //如果最终存在价值为sum/2的情况，则返回true，否则返回false
+
+    //创建dp数组，dp[j]表示容量为j时，背包内物品最大值
+    //根据提示，sum最大为20000，因此背包容量为10001即可。（包括0）
+    vector<int> dp (10001,0);
+
+    //转移方程推导：
+    //对于待放入元素nums[i]，两种情况：
+    //1. 重量大于背包容量，放不进去，dp[j] 维持原值不变；
+    //2. 重量小于背包容量，两种选择：
+    //  （1）不放进去，dp[j]维持原值
+    //  （2）放进去，并将剩余空间价值最大化 dp[j] = dp[j-nums[i]]+nums[i];
+    //两种情况取较大值。
+
+    //初始化
+    //全都初始化为0即可：如果如果题目给的价值都是正整数那么非0下标都初始化为0就可以了，如果题目给的价值有负数，那么非0下标就要初始化为负无穷。
+
+    //确定遍历顺序：
+    //j从后向前
+
+    //计算
+    int bagweight=0;
+    for(int i = 0; i<nums.size();i++){
+        bagweight += nums[i];
+    }
+    if (bagweight%2 == 1) return false;
+
+    bagweight = bagweight/2;   //背包容量
+
+    for (int i=0; i<nums.size(); i++){
+        for (int j = bagweight; j >= nums[i]; j--){
+            dp[j] = max(dp[j],dp[j-nums[i]]+nums[i]);
+        }
+    }
+    if (dp[bagweight] == bagweight) return true;
+    else return false;
+
+    }
+};
+```
+
+总结：
+
+边界很重要，遍历的时候一定要写对边界。
+
+`dp[bagweight] == bagweight`是本题的另一个关键点。因为在本题目中，重量和价值是一样的，所以如果存在和为sum/2（bagweight）的情况，即价值为bagweight，那么重量也一定是bagweight，即`dp[bagweight] == bagweight`是唯一可能存在的满足等和数组分割的情况。因此不需要在循环中判断`dp[j] == bagweight`是否存在，而只需要在迭代结束后进行一次判断即可。
+
+### 2.1.3 最后一块石头的重量（类似等和数组）
+
+题目描述：
+
+```c
+有一堆石头，用整数数组 stones 表示。其中 stones[i] 表示第 i 块石头的重量。
+
+每一回合，从中选出任意两块石头，然后将它们一起粉碎。假设石头的重量分别为 x 和 y，且 x <= y。那么粉碎的可能结果如下：
+
+如果 x == y，那么两块石头都会被完全粉碎；
+如果 x != y，那么重量为 x 的石头将会完全粉碎，而重量为 y 的石头新重量为 y-x。
+最后，最多只会剩下一块 石头。返回此石头 最小的可能重量 。如果没有石头剩下，就返回 0。
+
+ 
+
+示例 1：
+
+输入：stones = [2,7,4,1,8,1]
+输出：1
+解释：
+组合 2 和 4，得到 2，所以数组转化为 [2,7,1,8,1]，
+组合 7 和 8，得到 1，所以数组转化为 [2,1,1,1]，
+组合 2 和 1，得到 1，所以数组转化为 [1,1,1]，
+组合 1 和 1，得到 0，所以数组转化为 [1]，这就是最优值。
+示例 2：
+
+输入：stones = [31,26,33,21,40]
+输出：5
+示例 3：
+
+输入：stones = [1,2]
+输出：1
+ 
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/last-stone-weight-ii
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+```
+
+代码如下：
+
+```c++
+class Solution {
+public:
+    int lastStoneWeightII(vector<int>& stones) {
+    //实质就是将石头分成重量尽可能小的两堆，类似于等和子数组
+    //因此可以转化为背包问题，石头的重量和value都是stone[i]。
+    //创建dp数组，长度待优化，目前为所需最大长度：3000/2 = 1500；
+    //vector<int> dp (1501,0);
+
+    int sum = 0;
+    for (int i = 0; i < stones.size(); i++ ){
+        sum += stones[i];
+    }
+
+    int bagweight = sum/2; //偶数整除，奇数向下取整
+
+    vector<int> dp (bagweight+1,0);
+
+    for (int i = 0; i < stones.size(); i++ ){
+        for (int j = bagweight; j >= stones[i]; j--){
+            dp[j] = max(dp[j],dp[j-stones[i]]+stones[i]);
+        }
+    }
+
+    //上述循环求出的dp[bagweight]就是容量为bagweight的背包能装下的最大重量。
+    //剩余重量为sum - dp[bagweight];
+    //因为bagweight为向下取整，所以sum - dp[bagweight]始终大于或等于dp[bagweight]；
+    return sum - dp[bagweight]-dp[bagweight];
+    }
+};
+```
+
+总结：感觉实现并不难，难的是思路分析，如何把这个问题转化成动态规划问题。以及动态规划算法最终得到的结果该如何转化为题目要求的结果。
+
+### 2.1.4 目标和
+
+题目描述：
+
+```c
+给你一个整数数组 nums 和一个整数 target 。
+
+向数组中的每个整数前添加 '+' 或 '-' ，然后串联起所有整数，可以构造一个 表达式 ：
+
+例如，nums = [2, 1] ，可以在 2 之前添加 '+' ，在 1 之前添加 '-' ，然后串联起来得到表达式 "+2-1" 。
+返回可以通过上述方法构造的、运算结果等于 target 的不同 表达式 的数目。
+
+ 
+
+示例 1：
+
+输入：nums = [1,1,1,1,1], target = 3
+输出：5
+解释：一共有 5 种方法让最终目标和为 3 。
+-1 + 1 + 1 + 1 + 1 = 3
++1 - 1 + 1 + 1 + 1 = 3
++1 + 1 - 1 + 1 + 1 = 3
++1 + 1 + 1 - 1 + 1 = 3
++1 + 1 + 1 + 1 - 1 = 3
+示例 2：
+
+输入：nums = [1], target = 1
+输出：1
+ 
+
+提示：
+
+1 <= nums.length <= 20
+0 <= nums[i] <= 1000
+0 <= sum(nums[i]) <= 1000
+-1000 <= target <= 1000
+
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/target-sum
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+```
+
+代码如下：
+
+```c++
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+int findTargetSumWays(vector<int>& nums, int target) {
+    //转化为动态规划问题：
+    /*
+    思路分析：设数组和为sum，最后组合式中，正数和为pos，负数和为sum-pos;
+    因此： pos-(sum-pos) = S
+    即：   pos = (S+sum)/2;
+    从而，pos 的值也确定了，问题转化为从数组中选择元素，使其和为pos，求共有多少种方法；
+    这种求和问题类似前面做过的等和数组和石头分堆问题，但又有所不同；前两个问题都是求背包最大价值（容量），而本问题求共多少种方法；
+    因此本问题是一个组合问题。
+    nums[i]为第i个元素的重量及价值。
+    */
+
+    int sum = 0;
+    for (int i = 0; i < nums.size(); i++){
+        sum += nums[i];
+    }
+
+    int bagweight; //背包容量
+
+    if (target > sum) return 0; //这种情况下，pos和大于sum，显然不成立；
+    if ((target + sum)%2 == 1) return 0;   //pos必须为正整数，否则不成立;
+
+    bagweight = (target + sum) / 2;
+
+    if(bagweight < 0) return 0;  //这种情况没有考虑到，一直不通过
+
+    //创建dp，dp[j]表示填满容量为j的背包，共有多少种方法。
+    vector<int> dp (bagweight + 1, 0);
+
+    //转移方程：
+    /*
+    对于待放入元素nums[i],首先应满足其重量小于背包容量；本问题中，求解的是将包填满的方法数量，因此在这里应该只考虑填满的情况
+    例如，背包容量为5，待放入元素为3，那么此种情况下，能填满的方法数为dp[5-3],当前总的填满容量5的包的方法就是原来的每次对i迭
+    代的方法数之和，即dp[j] += dp[j-nums[i]];
+    */
+
+    //初始化
+    dp[0] = 1; //特别注意，若是初始化为0，那么所有元素都永远是零。
+
+    for (int i = 0; i < nums.size(); i++){
+        for (int j = bagweight; j >= nums[i]; j--){
+            dp[j] += dp[j-nums[i]];
+        }
+    }
+    cout<<dp[bagweight]<<endl;
+
+    return dp[bagweight];
+
+}
+int main() {
+    vector <int> test (1,100);
+    findTargetSumWays(test,-200);
+
+}
+
+```
+
