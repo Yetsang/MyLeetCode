@@ -1500,7 +1500,7 @@ public:
 
 ### 2.1.1 背包问题
 
-本部分内容参考代码随想录的github项目内容进行学习，这里记录心得。
+本部分内容参考[代码随想录的github项目](https://github.com/youngyangyang04/leetcode-master)内容进行学习，这里记录心得。
 
 在背包问题中，先介绍了二维数组的写法，又介绍了一维数组的写法。
 
@@ -1513,4 +1513,66 @@ public:
 在二维数组中，上一次遍历的数据存储在本次遍历计算的**上一行**，无论本次计算结果如何，都不会影响上一次计算的结果，本次遍历中 每一个元素使用的上一次遍历的数据，都是实实在在的上一次遍历的数据。因此二维数组下，正向遍历和反向遍历都不会有影响。
 
 在一维数组中，上一次遍历的数据和本次需要计算的数据存储在同一位置。如果从前向后遍历，新计算的结果就会将上次遍历的结果覆盖；而后面的计算还需要前面元素的**上次遍历结果**，但此时取到的数据已经是**此次遍历**的数据了。对于本题目来说，若使用一维数组存储，那么当前元素的值只与当前元素前面值有关，后面发生变化对当前元素不会有影响。因此，从后往前遍历，可以保证每个遍历到的元素计算需要的**上一次遍历结果**都是**未经更改的上一次遍历结果**。
+
+另外，在二维数组写法中 ，代码中进行了判断，如果背包重量小于物品重量，直接复制上次遍历值。而在一维数组中，直接讲循环停止条件设置为背包重量小于物品重量就停止。这样前面的元素依旧保留上次遍历的结果，省去了复制操作的开销。
+
+两种写法的代码如下：
+
+二维数组方法：
+
+```c++
+void test_2_wei_bag_problem1() {
+    vector<int> weight = {1, 3, 4};
+    vector<int> value = {15, 20, 30};
+    int bagWeight = 4;
+
+    // 二维数组
+    vector<vector<int>> dp(weight.size() + 1, vector<int>(bagWeight + 1, 0));
+
+    // 初始化
+    for (int j = weight[0]; j <= bagWeight; j++) {
+        dp[0][j] = value[0];
+    }
+
+    // weight数组的大小 就是物品个数
+    for(int i = 1; i < weight.size(); i++) { // 遍历物品
+        for(int j = 0; j <= bagWeight; j++) { // 遍历背包容量
+            if (j < weight[i]) dp[i][j] = dp[i - 1][j];
+            else dp[i][j] = max(dp[i - 1][j], dp[i - 1][j - weight[i]] + value[i]);
+
+        }
+    }
+
+    cout << dp[weight.size() - 1][bagWeight] << endl;
+}
+
+int main() {
+    test_2_wei_bag_problem1();
+}
+```
+
+一维数组方法：
+
+```c++
+void test_1_wei_bag_problem() {
+    vector<int> weight = {1, 3, 4};
+    vector<int> value = {15, 20, 30};
+    int bagWeight = 4;
+
+    // 初始化
+    vector<int> dp(bagWeight + 1, 0);
+    for(int i = 0; i < weight.size(); i++) { // 遍历物品
+        for(int j = bagWeight; j >= weight[i]; j--) { // 遍历背包容量
+            dp[j] = max(dp[j], dp[j - weight[i]] + value[i]);
+        }
+    }
+    cout << dp[bagWeight] << endl;
+}
+
+int main() {
+    test_1_wei_bag_problem();
+}
+
+
+```
 
