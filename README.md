@@ -2001,5 +2001,514 @@ public:
 
   而01背包的的二维数组实现和完全背包实现时，是从前到后遍历的，因此不用担心循环顺序问题，只要保证计算到`d[j]`时，需要用到的前面的元素已经计算好了即可。
 
+  **值得注意的是：对于纯完全背包问题，其for循环的先后循环是可以颠倒的！若题目变化，则需要具体考虑！**
+
+### 2.1.7零钱II
+
+问题描述：
+
+```c++
+给你一个整数数组 coins 表示不同面额的硬币，另给一个整数 amount 表示总金额。
+
+请你计算并返回可以凑成总金额的硬币组合数。如果任何硬币组合都无法凑出总金额，返回 0 。
+
+假设每一种面额的硬币有无限个。 
+
+题目数据保证结果符合 32 位带符号整数。
+
+ 
+
+示例 1：
+
+输入：amount = 5, coins = [1, 2, 5]
+输出：4
+解释：有四种方式可以凑成总金额：
+5=5
+5=2+2+1
+5=2+1+1+1
+5=1+1+1+1+1
+示例 2：
+
+输入：amount = 3, coins = [2]
+输出：0
+解释：只用面额 2 的硬币不能凑成总金额 3 。
+示例 3：
+
+输入：amount = 10, coins = [10] 
+输出：1
+ 
+
+提示：
+
+1 <= coins.length <= 300
+1 <= coins[i] <= 5000
+coins 中的所有值 互不相同
+0 <= amount <= 5000
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/coin-change-2
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+```
+
+代码：
+
+```c++
+class Solution {
+public:
+    int change(int amount, vector<int>& coins) {
+    //完全背包问题
+    //背包容量为金额amount，物品为硬币，物品重量和物品价值都是硬币金额
+    //dp[j]表示 凑出j金额的硬币组合为d[j]个
+    vector<int> dp (amount+1 , 0);
+
+    //转移公式
+    /*对于待放入coins[i]，还是老思路：首先，要满足背包容量j>coins[i]；
+                                  因为是填满问题，而不是价值最大化问题，因此，在这里满足条件的coins[i]
+                                  是一定要放进去的，因为不放进去的情况在coins[0]~coins[i-1]的时候已经
+                                  考虑到了。
+      又因为是组合问题，因此dp[j] += dp[j-coins[i]];
+    */
+
+    //初始化
+    //组合问题，dp[0] = 1,否则dp[j]一直为0；
+    dp[0] = 1;
+
+    //遍历顺序
+    /*
+    纯正的完全背包问题，先遍历背包或先遍历物品都是可以的。
+    对于本题目来说，求的是组合数，必须先遍历物品。
+    */
+    for (int i = 0; i < coins.size(); i++){
+        for (int j = coins[i]; j <= amount; j++){
+            dp[j] += dp[j-coins[i]];
+        }
+    }
+    return dp[amount];
+    }
+};
+```
+
+总结：
+
+这道题看似简单，实则很有代表性。最难的部分就是遍历顺序这部分。
+
+本题必须先遍历物品，再遍历背包，求得的才是**组合**数，否则就是**排列数**。
+
+这里理解比较困难，需要配合手动迭代图解释。
+
+对于先遍历物品，再遍历背包，遍历图如下：
+
+
+
+
+
+<img src="https://raw.githubusercontent.com/Yetsang/PicBed/main/img/%E5%9B%BE%E5%83%8F-9551010.jpeg" alt="图像" style="zoom:25%;" />
+
+按行从左到右遍历，过程符合人的思维。首先是只有一种硬币的情况下，也就是第一行，对于1元硬币来说，无论总额是多少，都只有1种组合方式；再到第二行，在第一种硬币的基础上，再加一种硬币，即2元。然后按照转移公式递推下去。
+
+对于先遍历背包，再遍历物品，遍历图如下：
+
+<img src="https://raw.githubusercontent.com/Yetsang/PicBed/main/img/%E5%9B%BE%E5%83%8F%202-9551249.jpeg" alt="图像 2" style="zoom: 25%;" />
+
+在`j = 3`处，两者发生了变化。对于图2来说，`i = 0`时`d[j] = 2`是根据转移公式计算出来的，这里就错了。
+
+至于为什么说下面这种方法计算的是排列数，暂时还没想明白。
+
+**另外，类似本问题这种 “组合种数” 和 等和数组等和问题类似的 “是否存在，最大价值”等是两个典型类型，转移公式不同。**
+
   
+
+### 2.1.8 组合总和IV
+
+题目描述：
+
+```c++
+给你一个由 不同 整数组成的数组 nums ，和一个目标整数 target 。请你从 nums 中找出并返回总和为 target 的元素组合的个数。
+
+题目数据保证答案符合 32 位整数范围。
+
+ 
+
+示例 1：
+
+输入：nums = [1,2,3], target = 4
+输出：7
+解释：
+所有可能的组合为：
+(1, 1, 1, 1)
+(1, 1, 2)
+(1, 2, 1)
+(1, 3)
+(2, 1, 1)
+(2, 2)
+(3, 1)
+请注意，顺序不同的序列被视作不同的组合。
+示例 2：
+
+输入：nums = [9], target = 3
+输出：0
+ 
+
+提示：
+
+1 <= nums.length <= 200
+1 <= nums[i] <= 1000
+nums 中的所有元素 互不相同
+1 <= target <= 1000
+
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/combination-sum-iv
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+```
+
+代码如下：
+
+```c++
+class Solution {
+public:
+    int combinationSum4(vector<int>& nums, int target) {
+    //完全背包问题。
+    //这是一个排列问题。遍历先背包，再物品。
+    
+    //dp[j] 表示和为j的元素组合的个数。
+
+    vector<int> dp (target+1 , 0);
+
+    //转移方程：还是装满问题，dp[j] += dp[j - nums[i]];
+    //初始化
+    dp[0] = 1;
+    
+    //遍历
+    for (int j = 0; j < target + 1; j++){
+        for (int i = 0; i < nums.size(); i++){
+            if (j >= nums[i] && dp[j] < INT_MAX - dp[j - nums[i]]) dp[j] += dp[j - nums[i]];
+        }
+    }
+
+    return dp[target];
+
+    }
+};
+```
+
+这道题是排列问题，因此循环顺序与上一题刚好相反。
+
+如果先遍历物品，再遍历背包，那么例如`{1},{3}`两个元素组成的组合只会出现`{1,3}`着一种，而忽略了`{3,1}`这种情况，这恰恰是本题代码的遍历方式能够弥补的。
+
+### 2.1.9 爬楼问题
+
+题目描述：
+
+```c
+假设你正在爬楼梯。需要 n 阶你才能到达楼顶。
+
+每次你可以爬 1 或 2 个台阶。你有多少种不同的方法可以爬到楼顶呢？
+
+注意：给定 n 是一个正整数。
+
+示例 1：
+
+输入： 2
+输出： 2
+解释： 有两种方法可以爬到楼顶。
+1.  1 阶 + 1 阶
+2.  2 阶
+示例 2：
+
+输入： 3
+输出： 3
+解释： 有三种方法可以爬到楼顶。
+1.  1 阶 + 1 阶 + 1 阶
+2.  1 阶 + 2 阶
+3.  2 阶 + 1 阶
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/climbing-stairs
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+```
+
+代码如下：
+
+```c++
+class Solution {
+public:
+    int climbStairs(int n) {
+    // 动态规划 背包问题 完全背包 排列问题
+    // 背包容量 n ，物品：爬几阶（1或2）， 重量和价值等于爬的阶数。
+    // dp[j] 表示爬了j阶的方法总数。
+    vector<int> dp ( n+1 , 0);
+
+    dp[0] = 1;
+
+    //递推公式
+    //组合问题：dp[j] += dp[j - nums[i]] //本题种nums[i]只能取1或2
+
+    //排列问题，先遍历背包
+    for (int j = 1; j <= n; j++){
+        for (int i = 1; i <= 2; i++){
+            if (j >= i) dp[j] += dp[j - i ];
+        }
+    }
+    return dp[n];
+    }
+};
+```
+
+总结：这道题我以为会比较简单，但是还是出了问题。
+
+最终遍历的起点 i，j都是从1 开始。我没加思考就设成从0开始。造成第一次循环，变成了`dp[0] += dp[0]`	这显然是不对的。以后写出计算循环后，手动验证这一步真的不能省。
+
+### 2.1.10 零钱兑换
+
+题目描述：
+
+```c++
+给你一个整数数组 coins ，表示不同面额的硬币；以及一个整数 amount ，表示总金额。
+
+计算并返回可以凑成总金额所需的 最少的硬币个数 。如果没有任何一种硬币组合能组成总金额，返回 -1 。
+
+你可以认为每种硬币的数量是无限的。
+
+ 
+
+示例 1：
+
+输入：coins = [1, 2, 5], amount = 11
+输出：3 
+解释：11 = 5 + 5 + 1
+示例 2：
+
+输入：coins = [2], amount = 3
+输出：-1
+示例 3：
+
+输入：coins = [1], amount = 0
+输出：0
+示例 4：
+
+输入：coins = [1], amount = 1
+输出：1
+示例 5：
+
+输入：coins = [1], amount = 2
+输出：2
+ 
+
+
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/coin-change
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+```
+
+代码如下：
+
+```c++
+class Solution {
+public:
+    int coinChange(vector<int>& coins, int amount) {
+    //动态规划问题 完全背包，最值问题 
+    //dp[j]表示凑足j金额所需的最少的硬币个数；
+    
+    vector<int> dp (amount + 1 , 0);
+
+    //递推公式：
+    /*
+    对于coins[i]: 首先肯定是需要小于背包容量；
+                 满足条件后，可以考虑放入或不放入。
+                 放入：dp[j] = dp [j - coins[i]] + 1;
+                 不放入：dp[j]维持不变;
+                 取两种情况较小值。
+    */
+
+    //初始化：
+    dp[0] = 0;
+    //其他初始化为最大值，因为若保持0，在进行min运算的时候会始终为0；
+    for (int i = 1; i < amount + 1; i++) dp[i] = INT_MAX;
+
+    for(int i = 0; i < coins.size(); i++){
+        for(int j = coins[i]; j <= amount; j++){
+            //这里需要处理，防止越界
+            if (dp [j - coins[i]] != INT_MAX)
+                dp[j] = min( dp[j] , dp[j - coins[i]] + 1 );
+        }
+    }
+
+    if(dp[amount] == INT_MAX) return -1;
+    return dp[amount];
+
+    }
+};
+```
+
+总结：基本思路还是正常的背包问题。但是这里求的是最小值，初始化就要设置为最大值，且还需要对越界条件进行处理。
+
+### 2.1.11 平方和
+
+题目描述：
+
+```c
+给定正整数 n，找到若干个完全平方数（比如 1, 4, 9, 16, ...）使得它们的和等于 n。你需要让组成和的完全平方数的个数最少。
+
+给你一个整数 n ，返回和为 n 的完全平方数的 最少数量 。
+
+完全平方数 是一个整数，其值等于另一个整数的平方；换句话说，其值等于一个整数自乘的积。例如，1、4、9 和 16 都是完全平方数，而 3 和 11 不是。
+
+ 
+
+示例 1：
+
+输入：n = 12
+输出：3 
+解释：12 = 4 + 4 + 4
+示例 2：
+
+输入：n = 13
+输出：2
+解释：13 = 4 + 9
+
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/perfect-squares
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+```
+
+
+
+代码如下：
+
+```c++
+class Solution {
+public:
+    int numSquares(int n) {
+    //动态规划 背包问题 完全背包 最值问题
+    //背包容量：n 背包物品：从1～n整数 物品重量和价值都为对应数值的平方
+    //dp[j] 表示对于正整数j，组成和的完全平方数的最少个数。
+
+    vector<int> dp (n+1 , INT_MAX);
+
+    //递推公式
+    /* 
+    对于待考虑整数i, 必须满足i*i小于容量；
+    两种选择：    放入：dp[j - i * i] + 1;
+                不放入：dp[j] = dp[j] 
+    两者取较小值。
+    */
+
+    //初始化：
+    dp[0] = 0;
+
+    for(int i = 0; i <= n; i++){
+        for(int j = i*i; j <= n; j++){
+            if (dp[j - i * i] != INT_MAX) 
+                dp[j] = min(dp[j] , dp[j - i * i] + 1);
+        }
+    }
+    
+    return dp[n];
+
+    }
+};
+```
+
+### 2.1.12 单词拆分
+
+题目描述：
+
+```c
+给定一个非空字符串 s 和一个包含非空单词的列表 wordDict，判定 s 是否可以被空格拆分为一个或多个在字典中出现的单词。
+
+说明：
+
+拆分时可以重复使用字典中的单词。
+你可以假设字典中没有重复的单词。
+示例 1：
+
+输入: s = "leetcode", wordDict = ["leet", "code"]
+输出: true
+解释: 返回 true 因为 "leetcode" 可以被拆分成 "leet code"。
+示例 2：
+
+输入: s = "applepenapple", wordDict = ["apple", "pen"]
+输出: true
+解释: 返回 true 因为 "applepenapple" 可以被拆分成 "apple pen apple"。
+     注意你可以重复使用字典中的单词。
+示例 3：
+
+输入: s = "catsandog", wordDict = ["cats", "dog", "sand", "and", "cat"]
+输出: false
+
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/word-break
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+```
+
+我第一次写的代码如下：
+
+```c++
+class Solution {
+public:
+    bool wordBreak(string s, vector<string>& wordDict) {
+    //vector<bool> isInDic (s.size() , false ); //用于存储查找成功标志；
+    unordered_set<string> wordSet (wordDict.begin() , wordDict.end()); //便于查找，使用find函数
+    int startposition = 0;  //当前查找起始位置
+
+    for(int i = 0; i < s.size() + 1; i++){
+        if (i - startposition < 1) continue;  //待查找为空字符，跳过
+        string word = s.substr(startposition , i - startposition); //当前待查找字符串
+        if(wordSet.find(word) != wordSet.end()) //找到了
+            startposition = i ; //本阶段查找已完成，下阶段从当前位置的下一个字符开始
+    }
+
+    if(startposition == s.size()) return true;
+    else return false;
+
+    }
+};
+```
+
+看起来没什么问题，执行的几个用例也通过了，而且只用了一个循环，我的算法会检测`cat`在字典里，`sand`在字典里，`og`不在字典中，因此返回`false`，但是遇到下面这个例子就完蛋了。
+
+```c
+s = ["aaaaaaa"];
+wordDict = ["aaa","aaaa"];
+```
+
+我的算法会找到两次`aaa`,然后返回错误。
+
+
+
+因此这道题还是得老老实实用背包:
+
+```c++
+class Solution {
+public:
+    bool wordBreak(string s, vector<string>& wordDict) {
+    //背包问题求解，完全背包
+    //背包为s，物品为单词；
+
+    //dp[j]表示从0到j的子字符串是否可以拆分成字典中的字符串。
+
+    //递推公式：
+    /* 若存在i < j,且d[i] == true, 且从i到j这段子字符串也在字典中，则d[j] = true;
+    */
+    unordered_set<string> wordSet(wordDict.begin(), wordDict.end());
+    vector<bool> dp(s.size() + 1, false);
+    dp[0] = true;
+
+    for (int j = 1; j <= s.size(); j++){
+        for (int i = 0; i < j; i++){
+            string word = s.substr(i , j - i);
+            if (wordSet.find(word) != wordSet.end() && dp[i])
+                dp[j] = true;
+        }
+    } 
+    return dp[s.size()];
+    }
+};
+```
+
+上面代码中的循环顺序，实际上是对每一个**j为结尾**的字符串进行遍历，因此没有重复工作。
 
