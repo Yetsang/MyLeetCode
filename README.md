@@ -1492,6 +1492,534 @@ public:
 著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
 ```
 
+## 1.3 链表
+
+这里复制了代码随想录大佬总结的[链表基础知识](./链表理论基础.md)。
+
+### 1.3.1 节点删除
+
+节点删除的原理很简单，就是指针重新指向下一节点即可。这里引入**虚拟头节点**的概念。如果使用原头节点，删除头节点的操作和删除其他节点操作是不一样的。代码写起来比较啰嗦。因此引入虚拟头节点， 指向原头节点，这样原链表的全部节点的删除操作都是同一逻辑，最后返回**虚拟头节点的下一个节点即可**。
+
+题目描述：
+
+```
+给你一个链表的头节点 head 和一个整数 val ，请你删除链表中所有满足 Node.val == val 的节点，并返回 新的头节点 。
+ 
+
+
+
+输入：head = [1,2,6,3,4,5,6], val = 6
+输出：[1,2,3,4,5]
+示例 2：
+
+输入：head = [], val = 1
+输出：[]
+示例 3：
+
+输入：head = [7,7,7,7], val = 7
+输出：[]
+ 
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/remove-linked-list-elements
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+```
+
+示例 1：
+![](https://raw.githubusercontent.com/Yetsang/PicBed/main/img/removelinked-list-20210823194859320.jpg)
+
+代码如下：
+
+```c++
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode() : val(0), next(nullptr) {}
+ *     ListNode(int x) : val(x), next(nullptr) {}
+ *     ListNode(int x, ListNode *next) : val(x), next(next) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode* removeElements(ListNode* head, int val) {
+        ListNode* VirtualHead = new ListNode(0);
+        ListNode* current;
+        VirtualHead->next = head;
+        current = VirtualHead;
+
+        while(current->next != nullptr){
+            if(current->next->val == val){
+                current->next = current->next->next;
+            }
+            else{
+                current = current->next;
+            }
+        }
+        
+        head = VirtualHead->next;
+        delete VirtualHead;
+        return head;
+    }
+};
+```
+
+这道题虽然简单，但是有几个重点必须要掌握：
+
+1. 虚拟头节点是要赋值的，`VirtualHead`是指向节点的指针，如果它直接指向某个节点，那是不需要分配内存空间的，如代码中的`current`,但是`VirtualHead`需要用它的指针域，`next`指向头节点，如果不预先分配内存空间，就不会有`next`之说。
+
+2. 注意循环过程，一开始我写的是：
+
+   ```c++
+   while(current->next != nullptr){
+               if(current->next->val == val){
+                   current->next = current->next->next;
+                   current = current->next;
+               }
+               else{
+                   current = current->next;
+               }
+           }
+   ```
+
+   **这样写会跳过判断删除节点的下一节点，会造成遗漏。**
+
+3. 最后记得释放内存。
+
+### 1.3.2 设计链表
+
+题目描述：
+
+```c
+设计链表的实现。您可以选择使用单链表或双链表。单链表中的节点应该具有两个属性：val 和 next。val 是当前节点的值，next 是指向下一个节点的指针/引用。如果要使用双向链表，则还需要一个属性 prev 以指示链表中的上一个节点。假设链表中的所有节点都是 0-index 的。
+
+在链表类中实现这些功能：
+
+get(index)：获取链表中第 index 个节点的值。如果索引无效，则返回-1。
+addAtHead(val)：在链表的第一个元素之前添加一个值为 val 的节点。插入后，新节点将成为链表的第一个节点。
+addAtTail(val)：将值为 val 的节点追加到链表的最后一个元素。
+addAtIndex(index,val)：在链表中的第 index 个节点之前添加值为 val  的节点。如果 index 等于链表的长度，则该节点将附加到链表的末尾。如果 index 大于链表长度，则不会插入节点。如果index小于0，则在头部插入节点。
+deleteAtIndex(index)：如果索引 index 有效，则删除链表中的第 index 个节点。
+ 
+
+示例：
+
+MyLinkedList linkedList = new MyLinkedList();
+linkedList.addAtHead(1);
+linkedList.addAtTail(3);
+linkedList.addAtIndex(1,2);   //链表变为1-> 2-> 3
+linkedList.get(1);            //返回2
+linkedList.deleteAtIndex(1);  //现在链表是1-> 3
+linkedList.get(1);            //返回3
+ 
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/design-linked-list
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+```
+
+代码如下：
+
+```c++
+class MyLinkedList {
+public:
+    // 定义链表节点结构体
+    struct LinkedNode {
+        int val;
+        LinkedNode* next;
+        LinkedNode(int val):val(val), next(nullptr){}
+    };
+
+    // 初始化链表
+    MyLinkedList() {
+        _dummyHead = new LinkedNode(0); // 这里定义的头结点 是一个虚拟头结点，而不是真正的链表头结点
+        _size = 0;
+    }
+
+    // 获取到第index个节点数值，如果index是非法数值直接返回-1， 注意index是从0开始的，第0个节点就是头结点
+    int get(int index) {
+        if (index > (_size - 1) || index < 0) {
+            return -1;
+        }
+        LinkedNode* cur = _dummyHead->next;
+        while(index--){ // 如果--index 就会陷入死循环
+            cur = cur->next;
+        }
+        return cur->val;
+    }
+
+    // 在链表最前面插入一个节点，插入完成后，新插入的节点为链表的新的头结点
+    void addAtHead(int val) {
+        LinkedNode* newNode = new LinkedNode(val);
+        newNode->next = _dummyHead->next;
+        _dummyHead->next = newNode;
+        _size++;
+    }
+
+    // 在链表最后面添加一个节点
+    void addAtTail(int val) {
+        LinkedNode* newNode = new LinkedNode(val);
+        LinkedNode* cur = _dummyHead;
+        while(cur->next != nullptr){
+            cur = cur->next;
+        }
+        cur->next = newNode;
+        _size++;
+    }
+
+    // 在第index个节点之前插入一个新节点，例如index为0，那么新插入的节点为链表的新头节点。
+    // 如果index 等于链表的长度，则说明是新插入的节点为链表的尾结点
+    // 如果index大于链表的长度，则返回空
+    void addAtIndex(int index, int val) {
+        if (index > _size) {
+            return;
+        }
+        LinkedNode* newNode = new LinkedNode(val);
+        LinkedNode* cur = _dummyHead;
+        while(index--) {
+            cur = cur->next;
+        }
+        newNode->next = cur->next;
+        cur->next = newNode;
+        _size++;
+    }
+
+    // 删除第index个节点，如果index 大于等于链表的长度，直接return，注意index是从0开始的
+    void deleteAtIndex(int index) {
+        if (index >= _size || index < 0) {
+            return;
+        }
+        LinkedNode* cur = _dummyHead;
+        while(index--) {
+            cur = cur ->next;
+        }
+        LinkedNode* tmp = cur->next;
+        cur->next = cur->next->next;
+        delete tmp;
+        _size--;
+    }
+
+    // 打印链表
+    void printLinkedList() {
+        LinkedNode* cur = _dummyHead;
+        while (cur->next != nullptr) {
+            cout << cur->next->val << " ";
+            cur = cur->next;
+        }
+        cout << endl;
+    }
+private:
+    int _size;
+    LinkedNode* _dummyHead;
+
+};
+```
+
+本题简单，全部考验基本功和基础知识，上面代码是代码随想录大佬写的，有以下几点需要注意：
+
+* 从整体结构上就考虑虚拟头节点，节约了很多代码
+
+* `_size`变量也让程序简洁了不少。
+
+* 注意插入和删除节点的`index`用法，用在`while(index--)`循环中，非常精妙。
+
+* 我的代码在删除节点的部分写错了，我写的是：
+
+  ```c++
+  ...
+  cur->next = cur->next->next;
+  cur = cur->next;
+  delete cur;
+  ...
+  ```
+
+  这里我忽略了，`cur->next`已经不是待删除元素，**而是待删除元素的下一个元素了。**
+
+  
+
+### 1.3.3 反转链表
+
+题目描述：
+
+```c
+给你单链表的头节点 head ，请你反转链表，并返回反转后的链表。
+ 
+
+示例 1：
+
+
+输入：head = [1,2,3,4,5]
+输出：[5,4,3,2,1]
+示例 2：
+
+
+输入：head = [1,2]
+输出：[2,1]
+示例 3：
+
+输入：head = []
+输出：[]
+ 
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/reverse-linked-list
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+```
+
+思路其实很简单，只需要将指针方向翻转即可。难的是怎么设计循环。思路图形表示如下：
+
+![206_反转链表](https://raw.githubusercontent.com/Yetsang/PicBed/main/img/20210218090901207-20210823214149793.png)
+
+![](https://raw.githubusercontent.com/Yetsang/PicBed/main/img/008eGmZEly1gnrf1oboupg30gy0c44qp-20210823214222900.gif)
+
+
+
+代码如下：
+
+```c++
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode() : val(0), next(nullptr) {}
+ *     ListNode(int x) : val(x), next(nullptr) {}
+ *     ListNode(int x, ListNode *next) : val(x), next(next) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode* reverseList(ListNode* head) {
+        ListNode* temp;
+        ListNode* cur;
+        ListNode* pre;
+
+        cur = head;
+        pre = nullptr;
+
+        while(cur){
+            temp = cur->next;
+            cur->next = pre;
+            pre = cur;
+            cur = temp;
+        }
+        return pre;
+    }
+};
+```
+
+这个循环真的十分精妙。**注意temp保存现场！**
+
+### 1.3.4 两两交换链表中的节点
+
+题目描述：
+
+```c
+给定一个链表，两两交换其中相邻的节点，并返回交换后的链表。
+
+你不能只是单纯的改变节点内部的值，而是需要实际的进行节点交换。
+
+ 
+
+示例 1：
+
+
+输入：head = [1,2,3,4]
+输出：[2,1,4,3]
+示例 2：
+
+输入：head = []
+输出：[]
+示例 3：
+
+输入：head = [1]
+输出：[1]
+ 
+
+提示：
+
+链表中节点的数目在范围 [0, 100] 内
+0 <= Node.val <= 100
+ 
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/swap-nodes-in-pairs
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+```
+
+代码：
+
+```c++
+class Solution {
+public:
+    ListNode* swapPairs(ListNode* head) {
+        ListNode* dummyHead = new ListNode(0); // 设置一个虚拟头结点
+        dummyHead->next = head; // 将虚拟头结点指向head，这样方面后面做删除操作
+        ListNode* cur = dummyHead;
+        while(cur->next != nullptr && cur->next->next != nullptr) {
+            ListNode* tmp = cur->next; // 记录临时节点
+            ListNode* tmp1 = cur->next->next->next; // 记录临时节点
+
+            cur->next = cur->next->next;    // 步骤一
+            cur->next->next = tmp;          // 步骤二
+            cur->next->next->next = tmp1;   // 步骤三
+
+            cur = cur->next->next; // cur移动两位，准备下一轮交换
+        }
+        return dummyHead->next;
+    }
+};
+```
+
+总结：虚拟头节点实在太方便啦！
+
+步骤图如下：
+
+![24.两两交换链表中的节点1](https://raw.githubusercontent.com/Yetsang/PicBed/main/img/24.%E4%B8%A4%E4%B8%A4%E4%BA%A4%E6%8D%A2%E9%93%BE%E8%A1%A8%E4%B8%AD%E7%9A%84%E8%8A%82%E7%82%B91-20210823215931473.png)
+
+
+
+### 1.3.5 删除链表中倒数第N个节点
+
+
+
+题目描述：
+
+```c
+给你一个链表，删除链表的倒数第 n 个结点，并且返回链表的头结点。
+
+进阶：你能尝试使用一趟扫描实现吗？
+
+ 
+
+示例 1：
+
+
+输入：head = [1,2,3,4,5], n = 2
+输出：[1,2,3,5]
+示例 2：
+
+输入：head = [1], n = 1
+输出：[]
+示例 3：
+
+输入：head = [1,2], n = 1
+输出：[1]
+
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/remove-nth-node-from-end-of-list
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+```
+
+
+
+采用双指针实现。
+
+如删除倒数第n个数，快慢指针起始都指向虚拟头节点。快指针先走n+1步，然后共同向后遍历。直到快指针为空指针。
+
+之所以走n+1步而不是n，是因为要慢指针指向待删除元素的前一个元素，才能删除待删除元素。
+
+代码如下：
+
+```c++
+class Solution {
+public:
+    ListNode* removeNthFromEnd(ListNode* head, int n) {
+        ListNode* dummyHead = new ListNode(0);
+        dummyHead->next = head;
+        ListNode* slow = dummyHead;
+        ListNode* fast = dummyHead;
+        while(n-- && fast != NULL) {
+            fast = fast->next;
+        }
+        fast = fast->next; // fast再提前走一步，因为需要让slow指向删除节点的上一个节点
+        while (fast != NULL) {
+            fast = fast->next;
+            slow = slow->next;
+        }
+        slow->next = slow->next->next;
+        return dummyHead->next;
+    }
+};
+```
+
+
+
+### 1.3.6 链表相交
+
+题目描述 ：
+
+![截屏2021-08-23 下午10.17.38](https://raw.githubusercontent.com/Yetsang/PicBed/main/img/%E6%88%AA%E5%B1%8F2021-08-23%20%E4%B8%8B%E5%8D%8810.17.38.png)
+
+
+
+
+
+思路：
+
+我本来的想法是采用双指针，暴力循环。但是看了题解之后发现自己好像个🪂。
+
+题目中的隐含条件是，两者如果重合，**那么必然是后半部分重合**。因此，可以将两个链表后端对齐，然后从同一个地方同时向后遍历，如果指针指向地置相同，那么相交，否则继续迭代直至空指针推出。
+
+代码如下：
+
+```c++
+class Solution {
+public:
+    ListNode *getIntersectionNode(ListNode *headA, ListNode *headB) {
+        ListNode* curA = headA;
+        ListNode* curB = headB;
+        int lenA = 0, lenB = 0;
+        while (curA != NULL) { // 求链表A的长度
+            lenA++;
+            curA = curA->next;
+        }
+        while (curB != NULL) { // 求链表B的长度
+            lenB++;
+            curB = curB->next;
+        }
+        curA = headA;
+        curB = headB;
+        // 让curA为最长链表的头，lenA为其长度
+        if (lenB > lenA) {
+            swap (lenA, lenB);
+            swap (curA, curB);
+        }
+        // 求长度差
+        int gap = lenA - lenB;
+        // 让curA和curB在同一起点上（末尾位置对齐）
+        while (gap--) {
+            curA = curA->next;
+        }
+        // 遍历curA 和 curB，遇到相同则直接返回
+        while (curA != NULL) {
+            if (curA == curB) {
+                return curA;
+            }
+            curA = curA->next;
+            curB = curB->next;
+        }
+        return NULL;
+    }
+};
+```
+
+### 1.3.7 环形链表
+
+
+
+[链表是否有环及环的入口](./0142.环形链表II.md)这个问题实在是很有趣，我就不复述了，大佬写的比我好多了，值得单独存下来。
+
+### 1.3.8 总结
+
+链表到此也告一段落。
+
+* 虚拟头
+* 遍历操作
+* 双指针
+
 # 2. 算法
 
 
@@ -2576,7 +3104,7 @@ public:
 
 要从背包问题的思维定式中走出来啦！
 
-### 2.1.4 打家劫舍II
+### 2.1.14 打家劫舍II
 
 题目描述：
 
@@ -2652,11 +3180,11 @@ public:
 };
 ```
 
-### 2.1.5 打家劫舍III
+### 2.1.15 打家劫舍III
 
 这道题涉及到递归和二叉树的遍历，我只是看了一遍，没有深入研究，等我看完二叉树再回头做。
 
-### 2.1.6 买卖股票的最佳时机
+### 2.1.16 买卖股票的最佳时机
 
 题目描述：
 
@@ -2781,7 +3309,7 @@ public:
 
 不过这个问题貌似题解中做的都是使用单调栈的方式做的，动态规划的代码交上去之后，效率确实不是很高。
 
-### 2.1.7 买卖股票的最佳时机II
+### 2.1.17 买卖股票的最佳时机II
 
 题目描述：
 
@@ -2841,7 +3369,7 @@ public:
 };
 ```
 
-### 2.1.8 买卖股票的最佳时机III
+### 2.1.18 买卖股票的最佳时机III
 
 题目描述：
 
@@ -2917,7 +3445,7 @@ public:
 };
 ```
 
-### 2.1.9 买股票问题小节
+### 2.1.19 买股票问题小节
 
 前三个问题后面，还有第四个问题，只是对第三个问题的扩展，将2次交易限制改成了k次交易。
 
@@ -2947,4 +3475,8 @@ public:
 
 
 这个思路的方法是个通吃的方法，而且随着问题越来越复杂，算法效率越来越高。从第一道题的不超过$10\%$到最后一题已经超越$50\%$了。
+
+
+
+
 
