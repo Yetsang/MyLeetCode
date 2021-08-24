@@ -2020,6 +2020,995 @@ public:
 * 遍历操作
 * 双指针
 
+## 1.4 二叉树
+
+[二叉树基础知识](./二叉树理论基础.md)以单独文件的形式存在。
+
+### 1.4.1 二叉树的递归遍历
+
+重点在于掌握递归的方法，写递归有如下三步：
+
+1. 确定递归函数的参数和返回值。
+2. 确定终止条件。
+3. 确定单层递归的逻辑。
+
+### 1.4.2 二叉树的迭代遍历(分别实现)
+
+递归的本质是用栈实现，因此可以考虑使用栈直接迭代实现二叉树遍历。
+
+三种遍历如下：
+
+* **前序遍历：**
+
+  前序遍历的栈实现的原理图如下：
+
+  ![二叉树前序遍历（迭代法）](https://raw.githubusercontent.com/Yetsang/PicBed/main/img/008eGmZEly1gnbmss7603g30eq0d4b2a.gif)
+
+  就是首先将根节点入栈，循环中，读出栈顶元素并将其出栈，然后将该元素的右孩子入栈，在入栈左孩子，这样保证在出栈的时候是先左后右。
+
+  代码如下：
+
+  ```cpp
+  class solution{
+   public:
+   		vector<int> preorderTraversal(TreeNode* root){
+      		stack<TreeNode*> st;
+        	vector<int> result;
+          if(root == NULL) return result;
+          st.push(root);
+          while(!st.empty()){
+              TreeNode* node = st.top();
+              result.push_back(node->val);
+              st.pop();
+              
+              if(node->right != nullptr) st.push(node->right);
+              if(node->left != nullptr) st.push(node->left);
+          }
+          return result;
+      }
+  }
+  ```
+
+  
+
+* **中序遍历：**
+
+  中序遍历相对于前序麻烦的一点是：先处理的节点是根节点，但是先出栈的却是左节点。因此需要额外的指针。
+
+  过程图如下：
+
+  ![二叉树中序遍历（迭代法）](https://raw.githubusercontent.com/Yetsang/PicBed/main/img/008eGmZEly1gnbmuj244bg30eq0d4kjm.gif)
+
+  ```cpp
+  class solution{
+    public:
+    	vector<int> inorderTraversal(TreeNode* root){
+        vector<int>result;
+        stack<TreeNode*> st;
+        TreeNode* cur = root;
+        
+        while( cur != NULL || !st.empty() ){
+          //一路向左,将节点入栈，直到遇到最左边的叶子结点，也就是需要输出的第一个节点
+          if(cur != NULL){
+            st.push(cur);
+            cur = cur->left;
+          }
+          else{
+            //这里的设计非常精妙，在访问叶子结点后，通过将cur赋值空指针，使下一个循环继续访问栈顶           //元素，从而完成对叶子结点的父节点的访问，还能将第三次访问引向右侧叶子结点，妙啊！
+            cur = st.top();
+            st.pop();
+            result.push_back(cur->val);
+            cur = cur->right;
+          }
+        }
+        return result;
+      }
+  }
+  ```
+
+  
+
+* **后序遍历：**
+
+ 后序遍历的思路和前两个不一样，不是直接遍历，而是通过前两个遍历变换而来。
+
+![前序到后序](https://raw.githubusercontent.com/Yetsang/PicBed/main/img/20200808200338924.png)
+
+**先序遍历是中左右，后续遍历是左右中，那么我们只需要调整一下先序遍历的代码顺序，就变成中右左的遍历顺序，然后在反转result数组，输出的结果顺序就是左右中了。**
+
+代码如下：
+
+```cpp
+class solution{
+  public:
+  	vector<int> postorderTraversal(TreeNode* root){
+      stack<TreeNode*> st;
+      vector<int> result;
+      if(root == NULL ) return result;
+      st.push(root);
+      while(!st.empty()){
+        TreeNode* node = st.top();
+        st.pop();
+        result.push_back(node->val);
+        
+        if(node->left) st.push(node->left);
+        if(node->right) st.push(node->right);
+      }
+      reverse(result.begin(),result.end());
+      return result;
+    }
+}
+```
+
+### 1.4.3 二叉树的统一迭代法
+
+第一版的二叉树迭代问题中，前序和后序的遍历代码是有关联的，而中序遍历是完全不同的思路，主要是因为使用栈的话，**无法同时解决访问结点（遍历节点）和处理结点（将元素放进结果集）不一致的情况。**这里寻求一种统一的迭代方法实现三种遍历。
+
+首先考虑中序遍历，核心是**把要访问的节点放入栈中，把要处理的节点也放入栈中，但是要做标记**。就是要处理的节点放入栈之后，紧接着放入一个空指针作为标记。这种方法也叫**标记法。**标记法标记的都是**相对的根节点**。
+
+过程示意图如下：
+
+![中序遍历迭代（统一写法）](https://raw.githubusercontent.com/Yetsang/PicBed/main/img/008eGmZEly1gnbmq3btubg30em09ue82.gif)
+
+
+
+
+
+代码如下：
+
+```c++
+class solution{
+  public:
+  	vector<int> inorderTraversal(TreeNode* root){
+      vector<int> result;
+      stack<TreeNode*> st;
+      if(root != NULL) st.push(root);
+      while(!st.empty()){
+        TreeNode* node = st.top();
+        if(node != NULL){ 
+          //不是空指针，说明不是要处理的，取出，放入右孩子，放回去，放入标记，放入左孩子
+          st.pop();
+          if(node->right) st.push(node->right);
+          
+          st.push(node);
+          st.push();
+          
+          if(node->left) st.push(node->left);
+        }
+        else{
+          st.pop();
+          node = st.top();
+          st.pop();
+          result.push_back(node->val);
+        }
+      }
+      return results;
+    }
+};
+```
+
+中序遍历解决后，其他两种情况就简单了。
+
+前序遍历的代码如下：
+
+```cpp
+class solution{
+  public:
+  	vector<int> preorderTraversal(TreeNode* root){
+      vector<int> result;
+      stack<TreeNode*> st;
+      if(root != NULL) st.push(root);
+      while(!st.empty()){
+        Treenode* node = st.top();
+        if(node != NULL){
+          st.pop();
+          if(node->right) st.push(node->right);
+          if(node->left) st.push(node->right);
+          st.push(node);
+          st.push(NULL);
+        }
+        else{
+          st.pop();
+          node = st.top();
+          st.pop();
+          result.push_back(node->value);
+        }
+      }
+      return result;
+    }
+};
+```
+
+
+
+后序遍历的代码如下：
+
+```cpp
+class solution{
+  public:
+  	vector<int> preorderTraversal(TreeNode* root){
+      vector<int> result;
+      stack<TreeNode*> st;
+      if(root != NULL) st.push(root);
+      while(!st.empty()){
+        Treenode* node = st.top();
+        if(node != NULL){
+          st.pop();
+          st.push(node);
+          st.push(NULL);
+          if(node->right) st.push(node->right);
+          if(node->left) st.push(node->right);
+          
+        }
+        else{
+          st.pop();
+          node = st.top();
+          st.pop();
+          result.push_back(node->value);
+        }
+      }
+      return result;
+    }
+};
+```
+
+
+
+### 1.4.4 二叉树的层序遍历
+
+#### 1.4.4.1 二叉树的层序遍历
+
+题目地址：https://leetcode-cn.com/problems/binary-tree-level-order-traversal/
+
+给你一个二叉树，请你返回其按 层序遍历 得到的节点值。 （即逐层地，从左到右访问所有节点）。
+
+![102.二叉树的层序遍历](https://raw.githubusercontent.com/Yetsang/PicBed/main/img/20210203144842988.png)
+
+层序遍历一个二叉树，就是从左到右一层一层的遍历，也就是图论中的广度优先遍历，只不过应用在二叉树上。
+
+这种遍历方式需要**队列**辅助实现。
+
+层序遍历的动画图如下：
+
+![102二叉树的层序遍历](https://raw.githubusercontent.com/Yetsang/PicBed/main/img/008eGmZEly1gnad5itmk8g30iw0cqe83.gif)**
+
+
+
+代码如下：
+
+```cpp
+class solution{
+  public:
+  	vector<vector<int>> levelOrder(TreeNode* root){
+      queue<TreeNode*> que;
+      vector<vector<int>> result;
+			if(root != NULL) que.push(root);
+      while(!que.empty()){
+        int size = que.size();
+        vector<int> vec;
+        
+        for(int i = 0; i < size; i++){
+          TreeNode* node = que.front();
+          que.pop();
+          vec.push_back(node->val);
+          if(node->left) que.push(node->left);
+          if(node->right) que.push(node->right);
+        }
+        result.push_back(vec);
+      }
+      return result;
+    }
+};
+```
+
+
+
+
+
+#### 1.4.4.2 二叉树的层序遍历II
+
+题目链接：https://leetcode-cn.com/problems/binary-tree-level-order-traversal-ii/
+
+给定一个二叉树，返回其节点值自底向上的层次遍历。 （即按从叶子节点所在层到根节点所在的层，逐层从左向右遍历）
+
+![107.二叉树的层次遍历II](https://raw.githubusercontent.com/Yetsang/PicBed/main/img/20210203151058308.png)
+
+
+
+这就是将上一题的最终数组翻转即可。
+
+代码如下：
+
+```cpp
+class solution{
+  public:
+  	vector<vector<int>> levelOrderBottom(TreeNode* root){
+      vector<vector<int>> result;
+      queue<TreeNode*> que;
+      if(root != NULL) que.push(root);
+      
+      while(!que.empty()){
+        int size = que.size();
+        vector<int> vec; //用于存储本层结果；
+        
+        //遍历本层：本层的所有节点都在遍历上层时加入队列了
+        for(int i = 0; i < size; i++){
+          TreeNode* node = que.front();
+          que.pop();
+          vec.push_back(node->val);
+          if(node->left) que.push(node->left);
+          if(node->right) que.push(node->right);
+        }
+        result.push_back(vec);
+      }
+      reverse(result.begin(),result.end());
+      return result;
+    }
+};
+```
+
+
+
+#### 1.4.4.3 二叉树的右视图
+
+题目链接：https://leetcode-cn.com/problems/binary-tree-right-side-view/
+
+给定一棵二叉树，想象自己站在它的右侧，按照从顶部到底部的顺序，返回从右侧所能看到的节点值。
+
+![199.二叉树的右视图](https://raw.githubusercontent.com/Yetsang/PicBed/main/img/20210203151307377.png)
+
+
+
+本来我还在想，先遍历完右子树，统计多少层，在返回来看左子树这边有没有高过它的。但是好蠢啊。上节讲过的层序遍历，直接返回没层的最后一个元素不就行了吗？
+
+代码如下：
+
+```cpp
+class Solution{
+  public:
+  	vector<int> rightSideView(TreeNode* root){
+      vector<int> result;
+      queue<TreeNode*> que;
+      if (root != NULL) que.push(root);
+      
+      while(!que.empty()){
+        int size = que.size(); //这里不能省略，用于循环，若直接用.size()，大小是变化的。
+        for(int i = 0; i < size; i++){
+          TreeNode* node = que.front();
+          que.pop();
+          if(i == (size - 1) ) result.push_back(node->val);
+          if(node->left) que.push(node.left);
+          if(node->right) que.push(node.right);
+        }
+      }
+      return result;
+    }
+};
+```
+
+#### 1.4.4.4 二叉树的层平均值
+
+题目链接：https://leetcode-cn.com/problems/average-of-levels-in-binary-tree/
+
+给定一个非空二叉树, 返回一个由每层节点平均值组成的数组。
+
+![637.二叉树的层平均值](https://raw.githubusercontent.com/Yetsang/PicBed/main/img/20210203151350500.png)
+
+就是按层遍历取平均值：
+
+代码如下：
+
+```cPP
+class Solution{
+  public:
+  	vector<double> averageOfLevels(TreeNode* root){
+      queue<TreeNode*> que;
+      if(root != NULL) que.push(root);
+      
+      vector<double> result;
+      
+      while(!que.empty()){
+        int size = que.size();
+        double sum = 0;
+        for(int i = 0; i < size; i++){
+          TreeNode* node;
+          node = que.front();
+          que.pop();
+          sum += node->val;
+          if (node->left) que.push(node->left);
+          if (node->right) que.push(node->right);
+        }
+        result.push_back(sum/size);
+      }
+      return result;
+    }
+};
+```
+
+#### 1.4.4.5 N叉树的层序遍历
+
+题目链接：https://leetcode-cn.com/problems/n-ary-tree-level-order-traversal/
+
+给定一个 N 叉树，返回其节点值的层序遍历。 (即从左到右，逐层遍历)。
+
+例如，给定一个 3叉树 :
+
+![429. N叉树的层序遍历](https://raw.githubusercontent.com/Yetsang/PicBed/main/img/20210203151439168.png)
+
+返回其层序遍历:
+
+[
+     [1],
+     [3,2,4],
+     [5,6]
+]
+
+其实依旧是层序遍历，只不过原来弹出队首后，将它的两个孩子加入队列，现在变成了最多三个。
+
+代码如下：
+
+```cpp
+class Solution {
+public:
+    vector<vector<int>> levelOrder(Node* root) {
+        queue<Node*> que;
+        if (root != NULL) que.push(root);
+        vector<vector<int>> result;
+        while (!que.empty()) {
+            int size = que.size();
+            vector<int> vec;
+            for (int i = 0; i < size; i++) {
+                Node* node = que.front();
+                que.pop();
+                vec.push_back(node->val);
+                for (int i = 0; i < node->children.size(); i++) { // 将节点孩子加入队列
+                    if (node->children[i]) que.push(node->children[i]);
+                }
+            }
+            result.push_back(vec);
+        }
+        return result;
+
+    }
+};
+```
+
+
+
+#### 1.4.4.6 在每个树行中找最大值
+
+题目链接：https://leetcode-cn.com/problems/find-largest-value-in-each-tree-row/
+
+您需要在二叉树的每一行中找到最大的值。
+
+![515.在每个树行中找最大值](https://raw.githubusercontent.com/Yetsang/PicBed/main/img/20210203151532153.png)
+
+依旧是层序遍历模板：
+
+代码如下：
+
+```cpp
+class Solution {
+public:
+    vector<int> largestValues(TreeNode* root) {
+        queue<TreeNode*> que;
+        if (root != NULL) que.push(root);
+        vector<int> result;
+        while (!que.empty()) {
+            int size = que.size();
+            int maxValue = INT_MIN; // 取每一层的最大值
+            for (int i = 0; i < size; i++) {
+                TreeNode* node = que.front();
+                que.pop();
+                maxValue = node->val > maxValue ? node->val : maxValue;
+                if (node->left) que.push(node->left);
+                if (node->right) que.push(node->right);
+            }
+            result.push_back(maxValue); // 把最大值放进数组
+        }
+        return result;
+    }
+};
+```
+
+#### 1.4.4.7 填充每个节点的下一个右侧节点指针
+
+题目链接：https://leetcode-cn.com/problems/populating-next-right-pointers-in-each-node/
+
+给定一个完美二叉树，其所有叶子节点都在同一层，每个父节点都有两个子节点。二叉树定义如下：
+
+```
+struct Node {
+  int val;
+  Node *left;
+  Node *right;
+  Node *next;
+}
+```
+
+
+填充它的每个 next 指针，让这个指针指向其下一个右侧节点。如果找不到下一个右侧节点，则将 next 指针设置为 NULL。
+
+初始状态下，所有 next 指针都被设置为 NULL。
+
+![116.填充每个节点的下一个右侧节点指针](https://raw.githubusercontent.com/Yetsang/PicBed/main/img/20210203152044855.jpg)
+
+还是层序遍历的思路，但在出队列时要进行指针指向工作。
+
+代码如下：
+
+```cpp
+class Solution {
+public:
+    Node* connect(Node* root) {
+        queue<Node*> que;
+        if (root != NULL) que.push(root);
+        while (!que.empty()) {
+            int size = que.size();
+            vector<int> vec;
+            Node* nodePre;
+            Node* node;
+            for (int i = 0; i < size; i++) {
+                if (i == 0) {
+                    nodePre = que.front(); // 取出一层的头结点
+                    que.pop();
+                    node = nodePre;
+                } else {
+                    node = que.front();
+                    que.pop();
+                    nodePre->next = node; // 本层前一个节点next指向本节点
+                    nodePre = nodePre->next;
+                }
+                if (node->left) que.push(node->left);
+                if (node->right) que.push(node->right);
+            }
+            nodePre->next = NULL; // 本层最后一个节点指向NULL
+        }
+        return root;
+
+    }
+};
+```
+
+
+
+其他问题大同小异，不做了。
+
+
+
+### 1.4.5 二叉树翻转
+
+题目地址：https://leetcode-cn.com/problems/invert-binary-tree/
+
+翻转一棵二叉树。
+
+![226.翻转二叉树](https://raw.githubusercontent.com/Yetsang/PicBed/main/img/20210203192644329.png)
+
+只需要把每个节点的左右孩子翻转即可。
+
+**递归法**：
+
+应用递归三部曲：
+
+1. 确定参数和返回值：
+
+参数：就是孩子待翻转的节点。
+
+返回值：无
+
+2. 确定停止条件
+
+当前节点为空节点，即返回。
+
+（为啥不是叶子结点返回？） 参考下面代码，应该是为了兼顾树空的情况。
+
+3. 确定单层处理逻辑：
+
+就是交换左右孩子，然后翻转左右子树。
+
+代码如下：
+
+```c++
+class Solution{
+public:
+    TreeNode* invertTree(TreeNode* root){
+      if(root == NULL) return root;
+      swap(root->left,root->right);
+      invertTree(root->left);
+      invertTree(root->right);
+      return root;
+    }
+};
+```
+
+**迭代法**：
+
+1. 前序遍历：
+
+代码如下：
+
+```cpp
+class Solution{
+public:
+    TreeNode* invertTree(TreeNode* root){
+        stack<TreeNode*> st;
+        if(root == Null) return root;
+        st.push(root);
+        while(!st.empty()){
+            TreeNode* node;
+            node = st.top();
+            swap(node->left,node->right);
+            if(node->right) st.push(node->right);
+            if(node->left) st.push(node->left); 
+        }
+        return root;
+    }
+};
+```
+
+利用统一迭代方法，代码如下：
+
+```cpp
+class Solution{
+public:
+  	TreeNode* invertTree(TreeNode* root){
+        stack<TreeNode*> st;
+        if( root != NULL) st.push(root);
+        while(!st.empty()){
+            TreeNode* node = st.top();
+            if(node != NULL){
+                st.pop();
+                if（node->right) st.push(node->right);
+                if (node->left) st.push(node->left);
+                st.push(node);
+                st.push(NULL);
+            }
+            else{
+                st.pop();
+                node = st.top();
+                st.pop();
+                swap(node->left, node->right);
+            }
+        }
+        return root;
+    }
+};
+```
+
+
+
+**广度优先遍历算法如下：**
+
+广度优先遍历也就是层序遍历。层序遍历也可以把每个孩子的左右孩子都翻转一次。
+
+代码如下：
+
+```cpp
+class Solution{
+public:
+    TreeNode* invertTree(TreeNode* root){
+        queue<TreeNode*> que;
+        if(root != NULL) que.push(root);
+        while(!que.empty()){
+            int size = que.size();
+            for(int i = 0; i<size; i++){
+                TreeNode* node = que.front();
+                que.pop();
+                swap(node->left , node->right);
+                if(node->left) que.push(node->left);
+                if(node->right) que.push(node->right);
+            }
+        }
+        return root;
+    }
+};
+```
+
+### 1.4.6 对称二叉树
+
+题目地址：https://leetcode-cn.com/problems/symmetric-tree/
+
+给定一个二叉树，检查它是否是镜像对称的。
+
+![101. 对称二叉树](https://raw.githubusercontent.com/Yetsang/PicBed/main/img/20210203144607387.png)
+
+# 
+
+**递归法**：
+
+1. 确定参数和返回值：
+
+判断根节点的两个子树是否是互相翻转的，进而判断这个树是不是对称的，返回值自然是bool
+
+参数就是左子树节点和右子树节点。
+
+2. 确定终止条件
+
+节点为空的情况有：（**注意我们比较的其实不是左孩子和右孩子，所以如下我称之为左节点右节点**）
+
+* 左节点为空，右节点不为空，不对称，return false
+* 左不为空，右为空，不对称 return  false
+* 左右都为空，对称，返回true
+
+此时已经排除掉了节点为空的情况，那么剩下的就是左右节点不为空：
+
+* 左右都不为空，比较节点数值，不相同就return false
+
+此时左右节点不为空，且数值也不相同的情况我们也处理了。
+
+3. 确定单层逻辑
+
+此时才进入单层递归的逻辑，单层递归的逻辑就是处理 左右节点都不为空，且数值相同的情况。
+
+
+* 比较二叉树外侧是否对称：传入的是左节点的左孩子，右节点的右孩子。
+* 比较内测是否对称，传入左节点的右孩子，右节点的左孩子。
+* 如果左右都对称就返回true ，有一侧不对称就返回false 。
+
+递归代码如下：
+
+```cpp
+class Solution{
+public:
+    bool compare(TreeNode* left, TreeNode* right){
+        //处理存在空节点的情况
+        if(left == NULL && right != NULL) return false;
+        else if(left != NULL && right == NULL) return false;
+        else if(left == NULL && right == NULL) return true;
+        else if(left->val != right->value) return false; //排除数值不同的情况；
+        
+        //判断各自子树：
+        bool outside = compare(left->left , right->right);
+        bool inside = compare(left->right , right->left);
+        bool isSame = outside && inside;
+      
+      	return isSame;
+    }
+    bool isSymmetric(TreeNode* root){
+        if(root == NULL) return true;
+        return compare （root->left,root->right);
+    }
+};
+```
+
+**迭代法**
+
+迭代法的动画图如下：
+
+![101.对称二叉树](https://raw.githubusercontent.com/Yetsang/PicBed/main/img/008eGmZEly1gnwcimlj8lg30hm0bqnpd.gif)
+
+代码如下：
+
+```cpp
+class Solution{
+public:
+    bool isSymmetric(TreeNode* root){
+        if(root == NULL) return true;
+        queue<TreeNode*> que;
+        que.push(root->left);
+        que.push(root->right);
+        while(!que.empty()){
+            TreeNode* leftnode = que.front(); que.pop();
+            TreeNode* rightnode = que.front(); que.pop();
+            
+            if(!leftnode && !rightnode ){//左右都为空
+                continue;
+            }
+             if ((!leftNode || !rightNode || (leftNode->val != rightNode->val))) {
+                return false;
+            }
+            que.push(leftnode->left);
+            que.push(rightnode->right);
+            que.push(leftnode->right);
+            que.push(rightnode->left);
+        }
+        return true; 
+    }
+};
+```
+
+### 1.4.7  二叉树的最大深度
+
+题目地址：https://leetcode-cn.com/problems/maximum-depth-of-binary-tree/
+
+给定一个二叉树，找出其最大深度。
+
+二叉树的深度为根节点到最远叶子节点的最长路径上的节点数。
+
+说明: 叶子节点是指没有子节点的节点。
+
+示例：
+给定二叉树 [3,9,20,null,null,15,7]，
+
+![104. 二叉树的最大深度](https://raw.githubusercontent.com/Yetsang/PicBed/main/img/20210203153031914.png)
+
+返回它的最大深度 3 。
+
+本题目有两种方法，递归法或迭代法。
+
+**递归法：**
+
+本题可以使用前序（中左右），也可以使用后序遍历（左右中），使用前序求的就是深度，使用后序求的是高度。
+
+**而根节点的高度就是二叉树的最大深度**，所以本题中我们通过后序求的根节点高度来求的二叉树最大深度。
+
+1. 确定参数和返回值
+
+参数就是根节点，返回值就是根节点的高度。
+
+2. 确定终止条件：如果节点为空的话，就返回0，表示高度为0。
+3. 确定单层递归的逻辑：找到左子树和右子树高度的较大值，并加一即可。
+
+代码如下：
+
+```c++
+class Solution{
+public:
+    int getdepth(treenode* node){
+        if(node == NULL) return 0;
+        int leftdepth = getdepth(node->left);
+        int rightdepth = getdepth(node->right);
+        int depth =  1 + max(leftdepth , rightdepth);
+      
+        return depth;
+   }
+    int maxdepth（treenode* root){
+        return getdepth(root)
+    }
+};
+```
+
+另外还可以采用层序遍历的方法来求最大高度。代码如下:
+
+```cpp
+class solution {
+public:
+    int maxdepth(treenode* root) {
+        if (root == null) return 0;
+        int depth = 0;
+        queue<treenode*> que;
+        que.push(root);
+        while(!que.empty()) {
+            int size = que.size();
+            depth++; // 记录深度
+            for (int i = 0; i < size; i++) {
+                treenode* node = que.front();
+                que.pop();
+                if (node->left) que.push(node->left);
+                if (node->right) que.push(node->right);
+            }
+        }
+        return depth;
+    }
+};
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # 2. 算法
 
 
