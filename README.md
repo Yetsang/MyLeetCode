@@ -2883,13 +2883,193 @@ public:
 };
 ```
 
+### 1.4.7 二叉树的最小深度
+
+题目地址：https://leetcode-cn.com/problems/minimum-depth-of-binary-tree/
+
+给定一个二叉树，找出其最小深度。
+
+最小深度是从根节点到最近叶子节点的最短路径上的节点数量。
+
+说明: 叶子节点是指没有子节点的节点。
+
+示例:
+
+给定二叉树 [3,9,20,null,null,15,7],
+
+![111.二叉树的最小深度1](https://raw.githubusercontent.com/Yetsang/PicBed/main/img/2021020315582586.png)
+
+返回它的最小深度  2.
 
 
 
+我下意识地以为这个问题和最大深度的问题应该差不多。但是却犯了carl大神提到的错误，果然是有坑就跳。
+
+遍历顺序上依然是后序遍历（因为要比较递归返回之后的结果），但在处理中间节点的逻辑上，最大深度很容易理解，最小深度可有一个误区，如图：
+
+![111.二叉树的最小深度](https://raw.githubusercontent.com/Yetsang/PicBed/main/img/20210203155800503.png)
+
+这就重新审题了，题目中说的是：**最小深度是从根节点到最近叶子节点的最短路径上的节点数量。**，注意是**叶子节点**。
+
+而左右孩子都为空的节点才是叶子节点。
+
+递归法如下：
+
+1. 参数：根节点，返回值：深度
+2. 终止条件：遇到空节点，返回0，表示高度为0.
+3. 确定单层递归的逻辑：
+
+所以，如果左子树为空，右子树不为空，说明最小深度是 1 + 右子树的深度。
+
+反之，右子树为空，左子树不为空，最小深度是 1 + 左子树的深度。 最后如果左右子树都不为空，返回左右子树深度最小值 + 1 。
+
+代码如下：
+
+```cpp
+class Solution {
+public:
+    int getDepth(TreeNode* node) {
+        if (node == NULL) return 0;
+        int leftDepth = getDepth(node->left);           // 左
+        int rightDepth = getDepth(node->right);         // 右
+                                                        // 中
+        // 当一个左子树为空，右不为空，这时并不是最低点
+        if (node->left == NULL && node->right != NULL) { 
+            return 1 + rightDepth;
+        }   
+        // 当一个右子树为空，左不为空，这时并不是最低点
+        if (node->left != NULL && node->right == NULL) { 
+            return 1 + leftDepth;
+        }
+        int result = 1 + min(leftDepth, rightDepth);
+        return result;
+    }
+
+    int minDepth(TreeNode* root) {
+        return getDepth(root);
+    }
+};
+```
+
+### 1.4.8 完全二叉树的节点数量
+
+题目地址：https://leetcode-cn.com/problems/count-complete-tree-nodes/
+
+给出一个完全二叉树，求出该树的节点个数。
+
+示例 1：
+
+* 输入：root = [1,2,3,4,5,6]
+* 输出：6
+
+示例 2：
+
+* 输入：root = []
+* 输出：0
+
+示例 3：
+
+* 输入：root = [1]
+* 输出：1
+
+提示：
+
+* 树中节点的数目范围是[0, 5 * 10^4]
+* 0 <= Node.val <= 5 * 10^4
+* 题目数据保证输入的树是 完全二叉树
+
+先考虑普通二叉树，
+
+采用递归的方法：
+
+代码如下：
+
+```cpp
+class Solution{
+public:
+    int getNodesNum(TreeNode* cur){
+        if(cur == NULL) return 0;
+        int leftnum = getNodesNum(cur->left);
+        int rightnum = getNodesNum(cur->right);
+        int treeNum =leftnum + rightnum + 1;
+        return treeNum;
+    }
+    int countNodes(TreeNode* root){
+      return getNodesNum(root);
+    }
+};
+```
+
+迭代法只需要在层序遍历的基础上加上统计节点数量的功能即可。
+
+```cpp
+class Solution{
+public:
+    int countNodes(TreeNode* root){
+        queue<TreeNode*> que;
+        if( root != NULL) que.push(root);
+        int result = 0;
+        while(!que.empty()){
+            int size = que.size();
+            for (int i = 0; i < size; i++ ){
+                TreeNode* node = que.front();
+                que.pop();
+                result++;
+                if(node->left) que.push(node->left);
+                if(node->right) que.push(node->right);
+            }
+        }
+        return result;
+    }
+};
+```
 
 
 
+**接下来考虑使用完全二叉树的性质来简化。**
 
+对于完全二叉树，存在两种情况，一是，它是满二叉树，而是非满二叉树。那么对于非满二叉树，不断对其左右孩子递归，总能找到为满二叉树的子树。而满二叉树的节点个数为2^树的深度-1。
+
+递归思路如下：
+
+1. 参数： 根节点，返回值：节点个数
+2. 停止条件：空指针，返回0
+3. 单次递归逻辑：左右分别向下，确定左右子树**最外侧**层数，如果层数相同，则说明以本节点为根节点的子树为满二叉树，否则继续向下递归。
+
+
+
+代码如下：
+
+```cpp
+class Solution{
+public:
+  	int countNodes(TreeNode* root){
+        if(root == nullptr) return 0;
+        TreeNode* left = root->left;
+        TreeNode* right = root->right;
+        int leftdepth = 0;
+        int rightdepth = 0;
+        
+        whle(left){
+            left = left->left;
+            leftdepth++;
+        }
+        while(right){
+            right = right->right;
+            rightdepth++;
+        }
+      
+        if(leftdepth == rightdepth){
+            return(2 << leftdepth) - 1; //2^(leftdepth+1)
+        }
+        return countNodes(root->left) + countNodes(root->right) + 1;
+    }  
+};
+```
+
+### 1.4.9 平衡二叉树
+
+### 1.4.10 二叉树的所有路径
 
 
 
@@ -4464,6 +4644,8 @@ public:
 
 
 这个思路的方法是个通吃的方法，而且随着问题越来越复杂，算法效率越来越高。从第一道题的不超过$10\%$到最后一题已经超越$50\%$了。
+
+
 
 
 
