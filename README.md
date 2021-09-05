@@ -1,5 +1,75 @@
 #MyLeetCode
-
+- [1. 数据结构基础](#1-数据结构基础)
+  - [1.1 数组](#11-数组)
+    - [1.1.1 删除有序数组中的重复项](#111-删除有序数组中的重复项)
+    - [1.1.2 移除元素](#112-移除元素)
+    - [1.1.3 搜索插入位置](#113-搜索插入位置)
+    - [1.1.4 最大子序和](#114-最大子序和)
+    - [1.1.5 加一](#115-加一)
+    - [1.1.6 合并两个有序数组](#116-合并两个有序数组)
+  - [1.2 字符串](#12-字符串)
+    - [1.2.1 罗马数字转整数](#121-罗马数字转整数)
+    - [1.2.2 最长公共前缀](#122-最长公共前缀)
+    - [1.2.3 有效括号](#123-有效括号)
+    - [1.2.4 strstr](#124-strstr)
+    - [1.2.5 excel 列表名字](#125-excel-列表名字)
+    - [1.2.6 无重复的最长子串](#126-无重复的最长子串)
+    - [1.2.7 最长回文子字符串](#127-最长回文子字符串)
+    - [1.2.8 整数转罗马数字](#128-整数转罗马数字)
+  - [1.3 链表](#13-链表)
+    - [1.3.1 节点删除](#131-节点删除)
+    - [1.3.2 设计链表](#132-设计链表)
+    - [1.3.3 反转链表](#133-反转链表)
+    - [1.3.4 两两交换链表中的节点](#134-两两交换链表中的节点)
+    - [1.3.5 删除链表中倒数第N个节点](#135-删除链表中倒数第n个节点)
+    - [1.3.6 链表相交](#136-链表相交)
+    - [1.3.7 环形链表](#137-环形链表)
+    - [1.3.8 总结](#138-总结)
+  - [1.4 二叉树](#14-二叉树)
+    - [1.4.1 二叉树的递归遍历](#141-二叉树的递归遍历)
+    - [1.4.2 二叉树的迭代遍历(分别实现)](#142-二叉树的迭代遍历分别实现)
+    - [1.4.3 二叉树的统一迭代法](#143-二叉树的统一迭代法)
+    - [1.4.4 二叉树的层序遍历](#144-二叉树的层序遍历)
+      - [1.4.4.1 二叉树的层序遍历](#1441-二叉树的层序遍历)
+      - [1.4.4.2 二叉树的层序遍历II](#1442-二叉树的层序遍历ii)
+      - [1.4.4.3 二叉树的右视图](#1443-二叉树的右视图)
+      - [1.4.4.4 二叉树的层平均值](#1444-二叉树的层平均值)
+      - [1.4.4.5 N叉树的层序遍历](#1445-n叉树的层序遍历)
+      - [1.4.4.6 在每个树行中找最大值](#1446-在每个树行中找最大值)
+      - [1.4.4.7 填充每个节点的下一个右侧节点指针](#1447-填充每个节点的下一个右侧节点指针)
+    - [1.4.5 二叉树翻转](#145-二叉树翻转)
+    - [1.4.6 对称二叉树](#146-对称二叉树)
+- [](#)
+    - [1.4.7  二叉树的最大深度](#147--二叉树的最大深度)
+    - [1.4.7 二叉树的最小深度](#147-二叉树的最小深度)
+    - [1.4.8 完全二叉树的节点数量](#148-完全二叉树的节点数量)
+    - [1.4.9 平衡二叉树](#149-平衡二叉树)
+    - [1.4.10 二叉树的所有路径](#1410-二叉树的所有路径)
+    - [1.4.11 左叶子之和](#1411-左叶子之和)
+    - [1.4.12 树的左下角值](#1412-树的左下角值)
+    - [1.4.13 路径总和](#1413-路径总和)
+- [2. 算法](#2-算法)
+  - [2.1 动态规划](#21-动态规划)
+    - [2.1.1 背包问题](#211-背包问题)
+    - [2.1.2 等和数组问题（01背包变体）](#212-等和数组问题01背包变体)
+    - [2.1.3 最后一块石头的重量（类似等和数组）](#213-最后一块石头的重量类似等和数组)
+    - [2.1.4 目标和](#214-目标和)
+    - [2.1.5 一和零](#215-一和零)
+    - [2.1.6 完全背包问题](#216-完全背包问题)
+    - [2.1.7零钱II](#217零钱ii)
+    - [2.1.8 组合总和IV](#218-组合总和iv)
+    - [2.1.9 爬楼问题](#219-爬楼问题)
+    - [2.1.10 零钱兑换](#2110-零钱兑换)
+    - [2.1.11 平方和](#2111-平方和)
+    - [2.1.12 单词拆分](#2112-单词拆分)
+    - [2.1.13 打家劫舍](#2113-打家劫舍)
+    - [2.1.14 打家劫舍II](#2114-打家劫舍ii)
+    - [2.1.15 打家劫舍III](#2115-打家劫舍iii)
+    - [2.1.16 买卖股票的最佳时机](#2116-买卖股票的最佳时机)
+    - [2.1.17 买卖股票的最佳时机II](#2117-买卖股票的最佳时机ii)
+    - [2.1.18 买卖股票的最佳时机III](#2118-买卖股票的最佳时机iii)
+    - [2.1.19 买股票问题小节](#2119-买股票问题小节)
+  - [2.2 回溯算法](#22-回溯算法)
 这是记录leetcode刷题的文档，采用git管理。
 
 第一部分是数据结构基础。
@@ -3068,114 +3138,294 @@ public:
 ```
 
 ### 1.4.9 平衡二叉树
+题目地址：https://leetcode-cn.com/problems/balanced-binary-tree/
+
+给定一个二叉树，判断它是否是高度平衡的二叉树。
+
+本题中，一棵高度平衡二叉树定义为：一个二叉树每个节点 的左右两个子树的高度差的绝对值不超过1。
+
+示例 1:
+
+给定二叉树 [3,9,20,null,null,15,7]
+
+![110.平衡二叉树](https://img-blog.csdnimg.cn/2021020315542230.png)
+
+返回 true 。
+首先需要明确 二叉树节点的深度和高度概念的区别。    
+* 二叉树节点的深度：指从根节点到该接待的最长简单路径边的条数。
+* 二叉树节点的高度：指从该节点到叶子节点的最长简单路径边的条数。    
+
+如下图所示：    
+![](https://img-blog.csdnimg.cn/20210203155515650.png)
+
+对于本题目来说，要比较左右两子树的高度即可。    
+**递归法：**    
+1. 确定地柜函数的参数和返回值。
+参数为传入的根节点。
+返回值为跟几点的深度。    
+2. 确定终止条件
+遇到空节点返回0，表示当前节点高度为0.    
+3. 明确单层递归的逻辑
+分别求出左右子树的高度，如果差值小于1，则返回当前二叉树的高度，否则返回-1，说明当前树已经不平衡了。
+最终代码如下：    
+```cpp
+class Solution{
+public:
+    int getdepth(TreeNode* node){
+        if(node == NULL){
+            return 0;
+        }
+        int leftdepth = getdepth(node->left);
+        if(leftdepth == -1) return -1;
+        int rightdepth = getdepth(node->right);
+        if(rightdepth == -1) return -1;
+
+        return abs(leftdepth-rightdepth)>1?-1:1+max(leftdepth,rightdepth);
+    }
+
+    bool isBalanced(TreeNode* root){
+        return getdepth(root) == -1?false:true;
+    }
+};
+```
+**迭代法：**    
+本题目同样可以采用迭代法。    
+在这里不做详细描述。
 
 ### 1.4.10 二叉树的所有路径
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+题目描述：    
+题目地址：https://leetcode-cn.com/problems/binary-tree-paths/
+
+给定一个二叉树，返回所有从根节点到叶子节点的路径。
+
+说明: 叶子节点是指没有子节点的节点。
+
+示例:
+![257.二叉树的所有路径1](https://img-blog.csdnimg.cn/2021020415161576.png)
+
+
+思路：
+查找从根节点到叶子节点的所有路径，需要前序遍历。此外，需要吧路径记录下来，因此还需要回溯。    
+过程如下图所示：    
+
+![257.二叉树的所有路径](https://img-blog.csdnimg.cn/20210204151702443.png)    
+
+首先采用递归的方法：    
+1. 确定参数和返回值。    
+参数：根节点，记录每一条路径的path，和记录所有路径结果的result. 不需要返回值。代码如下：    
+```cpp
+void traversal(TreeNode* node, vector<int>&path, vector<string>& result);
+```
+2. 确定终止条件
+本题目中，到叶子节点就停止递归。
+3. 单层递归逻辑
+
+完整代码如下：
+```cpp
+class Solution{
+private:
+    void traversal(TreeNode* cur, vector<int>&path, vector<string>&result){
+        path.push_back(cur->val);
+        if(cur->left == NULL && cur->right == NULL){
+            string sPath;
+            for(int i = 0; i < path.size()-1; i++){
+                sPath += to_string(path[i]);
+                sPath += "->";
+            }
+            sPath += to_string(path[path.size()-1]);
+            result.push_back(sPath);
+            return;
+        }
+
+        if(cur->left){
+            traversal(cur->left, path, result);
+            push.pop_back();   //回溯
+        }
+        if(cur->right){
+            traversal(cur->right,path, result);
+            path.pop_back();    //回溯
+        }
+        /* 上述过程可以简化如下：    
+        if (cur->left) traversal(cur->left, path + "->", result); // 左
+        if (cur->right) traversal(cur->right, path + "->", result); // 右
+        因为递归中传递的参数不是path本身，因此不需要显式回溯
+        */
+    }
+public:
+    vector<string> binaryTreePaths(TreeNode* root) {
+        vector<string> result;
+        vector<int> path;
+        if (root == NULL) return result;
+        traversal(root, path, result);
+        return result;
+    }
+
+};
+```
+
+### 1.4.11 左叶子之和
+题目地址：https://leetcode-cn.com/problems/sum-of-left-leaves/
+
+计算给定二叉树的所有左叶子之和。
+
+示例：
+
+![404.左叶子之和1](https://img-blog.csdnimg.cn/20210204151927654.png)
+整体代码如下：
+```cpp
+class Solution {
+public:
+    int sumOfLeftLeaves(TreeNode* root) {
+        if (root == NULL) return 0;
+
+        int leftValue = sumOfLeftLeaves(root->left);    // 左
+        int rightValue = sumOfLeftLeaves(root->right);  // 右
+                                                        // 中
+        int midValue = 0;
+        if (root->left && !root->left->left && !root->left->right) { // 中
+            midValue = root->left->val;
+        }
+        int sum = midValue + leftValue + rightValue;
+        return sum;
+    }
+};
+```
+
+
+### 1.4.12 树的左下角值
+
+题目地址：[https://leetcode-cn.com/problems/find-bottom-left-tree-value/](https://leetcode-cn.com/problems/find-bottom-left-tree-value/v)
+
+给定一个二叉树，在树的最后一行找到最左边的值。
+
+示例 1:
+
+![513.找树左下角的值](https://img-blog.csdnimg.cn/20210204152956836.png)
+
+示例 2:
+
+![513.找树左下角的值1](https://img-blog.csdnimg.cn/20210204153017586.png)
+
+本题目的思路非常简单，就是层序遍历，记录层序遍历最后一层的第一个元素。正好在着了回顾一下层序遍历的写法。    
+代码如下：
+```cpp
+class Solutio{
+public:
+    int findBottomLeftValue(TreeNode* root){
+        queue<TreeNode*> que;
+        if(root != NULL) que.push(root);
+        int result =  0;
+        while(!que.empty()){
+            int size = que.size();
+            for(int i = 0; i < size; i++){
+                TreeNode* node = que.front();
+                que.pop();
+                if(i == 0) result = node->value;
+                if(node -> left) que.push(node->left);
+                if(node -> right) que.push(node->right);
+            }
+        }
+        return result;
+    }
+};
+```
+
+虽然上述代码看起来简单，但是还是隐藏了非常精巧的逻辑。在最内层的的`for`循环中，没有显式地判断是否是最后一行，而是在每一行都对结果进行更新，这样循环结束，得到的自然就是最后一行的结果。而我在构思的时候还在苦苦思索该怎么判断是到了最后一行。这种思路值得学习。    
+另外，在这里回顾一下层序遍历的写法。代码如下：
+```cpp
+class Solution{
+public:
+    vector<vector<int>> levelOrder(TreeNode* root){
+        queue<TreeNode*> que;
+        if(root != NULL) que.push(root);
+
+        vector<vector<int>> result;
+        while(!que.empty()){
+            int size = que.size();
+            vector<int> vec;
+
+            for(int i = 0; i < size; i++){
+                TreeNode* node = que.front();
+                que.pop();
+                vec.push_back(node->val);
+                if(node->left) que.push(node->left);
+                if(node->right) que.push(node->right);
+            }
+         result.push_back(vec);
+        }
+        return result;
+    }
+};
+```
+
+### 1.4.13 路径总和
+题目地址：https://leetcode-cn.com/problems/path-sum/
+
+给定一个二叉树和一个目标和，判断该树中是否存在根节点到叶子节点的路径，这条路径上所有节点值相加等于目标和。
+
+说明: 叶子节点是指没有子节点的节点。
+
+示例: 
+给定如下二叉树，以及目标和 sum = 22，
+
+![112.路径总和1](https://img-blog.csdnimg.cn/20210203160355234.png)
+
+返回 true, 因为存在目标和为 22 的根节点到叶子节点的路径 5->4->11->2。    
+
+思路：其实就是暴力遍历所有路径就好。    
+两种方法：
+**递归法：**
+1. 确定函数返回值和参数
+返回类型为bool
+参数：二叉树根节点，路径和计数器。代码如下：
+```cpp
+bool traversal(treenode* cur, int count)
+```
+2. 确定终止条件
+若到达叶子节点，且满足条件。那么，返回true；到达叶子节点，不满足目标和，返回false。
+3. 单层递归逻辑
+**因为终止条件是判断叶子节点，所以递归的过程中就不要让空节点进入递归了。**
+递归函数返回TRUE，说明找到了合适的路径，应该立即返回。
+代码如下：
+```cpp
+if (cur->left){
+    if(traversal(cur->left,count - cur->left->val)) return true;
+}
+
+if(cur->right){
+    if(traversal(cur->right, count - cur->right->val)) return true;
+}
+
+return false;
+```
+整体代码如下：
+```cpp
+class solution {
+private:
+    bool traversal(treenode* cur, int count) {
+        if (!cur->left && !cur->right && count == 0) return true; // 遇到叶子节点，并且计数为0
+        if (!cur->left && !cur->right) return false; // 遇到叶子节点直接返回
+
+        if (cur->left) { // 左
+            count -= cur->left->val; // 递归，处理节点;
+            if (traversal(cur->left, count)) return true;
+            count += cur->left->val; // 回溯，撤销处理结果
+        }
+        if (cur->right) { // 右
+            count -= cur->right->val; // 递归，处理节点;
+            if (traversal(cur->right, count)) return true;
+            count += cur->right->val; // 回溯，撤销处理结果
+        }
+        return false;
+    }
+
+public:
+    bool haspathsum(treenode* root, int sum) {
+        if (root == null) return false;
+        return traversal(root, sum - root->val);
+    }
+};
+```
 
 
 
@@ -4647,6 +4897,8 @@ public:
 
 
 
+## 2.2 回溯算法
+关于回溯算法的基础知识，在[单独的文件中](./回溯算法理论基础.md)    
 
 
 
