@@ -39,7 +39,6 @@
       - [1.4.4.7 填充每个节点的下一个右侧节点指针](#1447-填充每个节点的下一个右侧节点指针)
     - [1.4.5 二叉树翻转](#145-二叉树翻转)
     - [1.4.6 对称二叉树](#146-对称二叉树)
-- [](#)
     - [1.4.7  二叉树的最大深度](#147--二叉树的最大深度)
     - [1.4.7 二叉树的最小深度](#147-二叉树的最小深度)
     - [1.4.8 完全二叉树的节点数量](#148-完全二叉树的节点数量)
@@ -51,6 +50,10 @@
     - [1.4.14 构造二叉树](#1414-构造二叉树)
     - [1.4.15 构造最大的二叉树](#1415-构造最大的二叉树)
     - [1.4.16 合并二叉树](#1416-合并二叉树)
+    - [1.4.17 二叉搜索树](#1417-二叉搜索树)
+    - [1.4.18 判断是否为二叉搜索树](#1418-判断是否为二叉搜索树)
+    - [1.4.19 二叉搜索树的最小绝对差](#1419-二叉搜索树的最小绝对差)
+    - [1.4.20 二叉搜索树中的众数](#1420-二叉搜索树中的众数)
 - [2. 算法](#2-算法)
   - [2.1 动态规划](#21-动态规划)
     - [2.1.1 背包问题](#211-背包问题)
@@ -2785,7 +2788,6 @@ public:
 
 ![101. 对称二叉树](https://raw.githubusercontent.com/Yetsang/PicBed/main/img/20210203144607387.png)
 
-# 
 
 **递归法**：
 
@@ -3647,8 +3649,199 @@ public:
 };
 ```
 **需要注意的是：递归三部曲的确定终止条件，我原来理解的一直不够深入，不是指程序终止的条件，而是某次递归到底了，需要返回上级递归的条件！**
+另外，此题目还可以用层序遍历来做。代码如下：
+```cpp
+class Solution {
+public:
+    TreeNode* mergeTrees(TreeNode* t1, TreeNode* t2) {
+        if (t1 == NULL) return t2;
+        if (t2 == NULL) return t1;
+        queue<TreeNode*> que;
+        que.push(t1);
+        que.push(t2);
+        while(!que.empty()) {
+            TreeNode* node1 = que.front(); que.pop();
+            TreeNode* node2 = que.front(); que.pop();
+            // 此时两个节点一定不为空，val相加
+            node1->val += node2->val;
 
+            // 如果两棵树左节点都不为空，加入队列
+            if (node1->left != NULL && node2->left != NULL) {
+                que.push(node1->left);
+                que.push(node2->left);
+            }
+            // 如果两棵树右节点都不为空，加入队列
+            if (node1->right != NULL && node2->right != NULL) {
+                que.push(node1->right);
+                que.push(node2->right);
+            }
 
+            // 当t1的左节点 为空 t2左节点不为空，就赋值过去
+            if (node1->left == NULL && node2->left != NULL) {
+                node1->left = node2->left;
+            }
+            // 当t1的右节点 为空 t2右节点不为空，就赋值过去
+            if (node1->right == NULL && node2->right != NULL) {
+                node1->right = node2->right;
+            }
+        }
+        return t1;
+    }
+};
+```
+
+### 1.4.17 二叉搜索树
+题目地址：https://leetcode-cn.com/problems/search-in-a-binary-search-tree/
+
+给定二叉搜索树（BST）的根节点和一个值。 你需要在BST中找到节点值等于给定值的节点。 返回以该节点为根的子树。 如果节点不存在，则返回 NULL。
+
+例如，
+
+![700.二叉搜索树中的搜索](https://img-blog.csdnimg.cn/20210204155522476.png)
+
+在上述示例中，如果要找的值是 5，但因为没有节点值为 5，我们应该返回 NULL。
+二叉搜索树因其结构的特殊性，递归和和遍历都比较简单。
+递归法的代码如下：
+```cpp
+class Solution {
+public:
+    TreeNode* searchBST(TreeNode* root, int val) {
+        if (root == NULL || root->val == val) return root;
+        if (root->val > val) return searchBST(root->left, val);
+        if (root->val < val) return searchBST(root->right, val);
+        return NULL;
+    }
+};
+```
+注意单层递归中的return，要注意区分什么时候加return，什么时候不加。
+**如果要搜索一条边，递归函数就要加返回值，这里也是一样的道理。因为搜索到目标节点了，就要立即return了，这样才是找到节点就返回（搜索某一条边），如果不加return，就是遍历整棵树了。**
+迭代法代码如下：
+```cpp
+class Solution {
+public:
+    TreeNode* searchBST(TreeNode* root, int val) {
+        while (root != NULL) {
+            if (root->val > val) root = root->left;
+            else if (root->val < val) root = root->right;
+            else return root;
+        }
+        return NULL;
+    }
+};
+```
+
+### 1.4.18 判断是否为二叉搜索树
+给定一个二叉树，判断其是否是一个有效的二叉搜索树。
+
+假设一个二叉搜索树具有如下特征：
+
+* 节点的左子树只包含小于当前节点的数。
+* 节点的右子树只包含大于当前节点的数。
+* 所有左子树和右子树自身必须也是二叉搜索树。
+
+![98.验证二叉搜索树](https://img-blog.csdnimg.cn/20210203144334501.png)
+
+这道题目中有一个比较隐蔽的陷阱，我一开始就掉了进去，那就是，不能单纯地比较左节点小于中间节点，右节点大于中间节点就完事了。要比的是左子树所有节点小于中间节点，右子树所有节点大于中间节点。
+如下图所示，就陷入了这个陷阱。
+![二叉搜索树](https://img-blog.csdnimg.cn/20200812191501419.png)
+
+整体代码如下：
+```cpp
+class Solution {
+public:
+    long long maxVal = LONG_MIN; // 因为后台测试数据中有int最小值
+    bool isValidBST(TreeNode* root) {
+        if (root == NULL) return true;
+
+        bool left = isValidBST(root->left);
+        // 中序遍历，验证遍历的元素是不是从小到大
+        if (maxVal < root->val) maxVal = root->val;
+        else return false;
+        bool right = isValidBST(root->right);
+
+        return left && right;
+    }
+};
+```
+### 1.4.19 二叉搜索树的最小绝对差
+给你一棵所有节点为非负值的二叉搜索树，请你计算树中任意两节点的差的绝对值的最小值。
+
+示例：
+
+![530二叉搜索树的最小绝对差](https://img-blog.csdnimg.cn/20201014223400123.png)
+
+提示：树中至少有 2 个节点。
+
+首先可以将搜索树转换为有序数组，然后求最小差就简单了。
+代码如下：
+```cpp
+class Solution{
+private:
+vector<int> vec;
+void traversal(TreeNode* root){
+    if(root == NULL) return;
+    traversal(root->left);
+    vec.push_back(root->val);
+    traversal(root->right);
+}
+public:
+int getMinimumDifference(TreeNode* root){
+    vec.clear();
+    traversal(root);
+    if(vec.size() < 2 ) return 0;
+    int result = INT_MAX;
+    for(int i = 1; i < vec.size(); i++){
+        result = min(result, vec[i] - vec[i-1]);
+    }
+    return result;
+}
+};
+```
+其实，不进行转换，在遍历过程中直接比较计算也是可以的。
+代码如下：
+```cpp
+class Solution{
+private:
+int result = INT_MAX;
+TreeNode* pre;
+void traversal(TreeNode* cur){
+    if(cur == NULL) return;
+    traversal(cur->left);
+    if(pre != NULL){
+        result = min(result, cur->val - pre->val);
+    }
+    pre = cur;
+    traversal(cur->right);
+}
+public:
+int getMinimumDifference(TreeNode* root){
+    traversal(root);
+    return result;
+}
+};
+``` 
+### 1.4.20 二叉搜索树中的众数
+题目地址：https://leetcode-cn.com/problems/find-mode-in-binary-search-tree/solution/
+
+给定一个有相同值的二叉搜索树（BST），找出 BST 中的所有众数（出现频率最高的元素）。
+
+假定 BST 有如下定义：
+
+* 结点左子树中所含结点的值小于等于当前结点的值
+* 结点右子树中所含结点的值大于等于当前结点的值
+* 左子树和右子树都是二叉搜索树
+
+例如：
+
+给定 BST [1,null,2,2],
+
+![501. 二叉搜索树中的众数](https://img-blog.csdnimg.cn/20201014221532206.png)
+
+返回[2].
+
+提示：如果众数超过1个，不需考虑输出顺序
+
+进阶：你可以不使用额外的空间吗？（假设由递归产生的隐式调用栈的开销不被计算在内）
 
 
 
